@@ -2,8 +2,15 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <string>
+#define ekhon e.key.keysym.sym
 const int SW = 1920;
 const int SH = 1080;
+const int walking = 9;
+SDL_Rect going_up[walking];
+SDL_Rect going_down[walking];
+SDL_Rect going_left[walking];
+SDL_Rect going_right[walking];
+SDL_Rect play_button_rect;
 class texture_jinish
 {
   public:
@@ -22,6 +29,7 @@ class texture_jinish
     int mWidth,mHeight;
 
 };
+texture_jinish skeleton,play_button,quit_button;
 bool init();//Initialization
 bool loadMedia();//loads media
 void close();//memory saving before closing
@@ -89,11 +97,11 @@ void texture_jinish::render(int x,int y,SDL_Rect* clip)
   }
   SDL_RenderCopy(main_renderer,mTexture,clip,&renderQuad);
 }
-int texture_jinish::getHeight()
+int texture_jinish::getH()
 {
   return mHeight;
 }
-int texture_jinish::getWidth()
+int texture_jinish::getW()
 {
   return mWidth;
 }
@@ -112,7 +120,7 @@ bool init()
       printf( "Warning: Linear texture filtering not enabled!" );
     }
     main_window = SDL_CreateWindow("Life of Naimujjaman",0,0,SW,SH,SDL_WINDOW_SHOWN);
-    if(main_window =NULL)
+    if(main_window ==NULL)
     {
       printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
 			s = false;
@@ -120,7 +128,7 @@ bool init()
     else
     {
       main_renderer = SDL_CreateRenderer(main_window,-1,SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
-      if(main_renderer = NULL)
+      if(main_renderer == NULL)
       {
         printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
 				s = false;
@@ -143,10 +151,72 @@ bool init()
 bool loadMedia()
 {
   bool s = true;
+  if(!skeleton.loadFromFile("skeleton.png"))
+  {
+    printf( "Failed to load walking animation texture!\n" );
+		s = false;
+  }
+  else
+  {
+    if(!play_button.loadFromFile("play.png"))
+    {
+        printf( "Failed to load play button texture!\n" );
+    		s = false;
+    }
+    else
+    {
+      play_button_rect.x = 0;
+      play_button_rect.y = 0;
+      play_button_rect.w = 220;
+      play_button_rect.h = 220;
+      int hx = 17,hy = 15,inter = 64;
+      int hh=46,ww=30;
+      for(int w=0;w<walking;w++)
+      {
+        going_up[w].x = hx;
+        going_up[w].y = hy;
+        going_up[w].h=hh;
+        going_up[w].w = ww;
+        hx += inter;
+      }
+      hx = 19,hy=79,inter=64;
+      hh=47,ww=24;
+      for(int w=0;w<walking;w++)
+      {
+        going_left[w].x = hx;
+        going_left[w].y = hy;
+        going_left[w].h=hh;
+        going_left[w].w = ww;
+        hx += inter;
+      }
+      hx = 17,hy=143,inter=64;
+      hh=47,ww=30;
+      for(int w=0;w<walking;w++)
+      {
+        going_down[w].x = hx;
+        going_down[w].y = hy;
+        going_down[w].h=hh;
+        going_down[w].w = ww;
+        hx += inter;
+      }
+      hx = 19,hy=207,inter=64;
+      hh=47,ww=24;
+      for(int w=0;w<walking;w++)
+      {
+        going_right[w].x = hx;
+        going_right[w].y = hy;
+        going_right[w].h=hh;
+        going_right[w].w = ww;
+        hx += inter;
+      }
+    }
+
+  }
   return s;
 }
 void close()
 {
+  skeleton.free();
   SDL_DestroyWindow(main_window);
   SDL_DestroyRenderer(main_renderer);
   main_window = NULL;
@@ -156,5 +226,87 @@ void close()
 }
 int main()
 {
+  if(!init())printf("Error\n");
+  else
+  {
+    if(!loadMedia())printf("Error\n");
+    else
+    {
+      SDL_Event e;
+      int ident=0,f=0,x=150,y=150;
+      int mx,my;
+      bool quit = false;
+      bool menu=false;
+      while(!quit)
+      {
+        while(SDL_PollEvent(&e))
+        {
+          if(e.type == SDL_KEYDOWN)
+          {
+            if(menu)
+            {
+              f++;
+              if(f >= 9)f=0;
+              if(ekhon == SDLK_UP)
+              {
+                ident=0;
+                y-=7;
+                if(y < 0)y=0;
+              }
+              else if(ekhon == SDLK_DOWN)
+              {
+                ident=1;
+                y+=7;
+                if(y > 1080)y=1080;
+              }
+              else if(ekhon == SDLK_LEFT)
+              {
+                ident=2;
+                x-=7;
+                if(x < 0)x=0;
+              }
+              else if(ekhon == SDLK_RIGHT)
+              {
+                ident=3;
+                x+=7;
+                if(x > 1920)y=1920;
+              }
+              else f=0;
+            }
+          }
+          else if(e.type == SDL_MOUSEBUTTONUP)
+          {
+            SDL_GetMouseState(&mx,&my);
+            if(mx >= SW/4 && mx <= SW/4+220 && my >= SH/4 && my <= SH/4+220)menu=true;
+            //menu = true;
+          }
+          else if(e.type == SDL_QUIT)
+          {
+            quit = true;
+          }
+        }
+        if(menu)
+        {
+          SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+  				SDL_RenderClear( main_renderer );
+          if(ident == 0)skeleton.render(x,y,going_up+f);
+          else if(ident == 1)skeleton.render(x,y,going_down+f);
+          else if(ident == 2)skeleton.render(x,y,going_left+f);
+          else if(ident == 3)skeleton.render(x,y,going_right+f);
+          SDL_RenderPresent(main_renderer);
+        }
+        else
+        {
+          SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xAA, 0xAA, 0xAA );
+          SDL_Rect *play = &play_button_rect;
+          SDL_RenderClear( main_renderer );
+          play_button.render(SW/4,SH/4,play);
+          SDL_RenderPresent(main_renderer);
+        }
+      }
+
+    }
+  }
+  close();
   return 0;
 }
