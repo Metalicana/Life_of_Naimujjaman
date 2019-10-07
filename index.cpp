@@ -20,6 +20,7 @@ SDL_Rect play_button_array[button_animation];
 SDL_Rect quit_button_array[button_animation];
 SDL_Rect logo_rect;
 SDL_Rect road_rect;
+
 class texture_jinish
 {
   public:
@@ -31,19 +32,19 @@ class texture_jinish
     void setBlendMode(SDL_BlendMode blending);//blending
     void setAlpha(Uint8 alpha);//alpha modulation
     void render(int x,int y, SDL_Rect *clip =NULL);//texture rendering on a point
-    int getW();
-    int getH();
+    int getW();//fetches the width
+    int getH();//fetches the height
   private:
-    SDL_Texture *mTexture;
-    int mWidth,mHeight;
+    SDL_Texture *mTexture;//main texture
+    int mWidth,mHeight;//main width and height
 
 };
-texture_jinish skeleton,play_button,quit_button,logo,road;
+texture_jinish skeleton,play_button,quit_button,logo,road;//textures
 bool init();//Initialization
 bool loadMedia();//loads media
 void close();//memory saving before closing
-SDL_Window *main_window = NULL;
-SDL_Renderer *main_renderer = NULL;
+SDL_Window *main_window = NULL;//main window
+SDL_Renderer *main_renderer = NULL;//main renderer
 texture_jinish::texture_jinish()
 {
   mTexture = NULL;
@@ -255,7 +256,7 @@ void close()
   IMG_Quit();
   SDL_Quit();
 }
-int main()
+int main(int argc,char *argv[])
 {
   if(!init())printf("Error\n");
   else
@@ -267,7 +268,6 @@ int main()
       int ident=0,f=0,p_f=6,q_f=6;
       int character_x = 390,character_y=600;
       int road_x = 340,road_y_1 = 0,road_y_2=-720;
-      //bool switch_it = false;
       int mx,my;
       bool quit = false;
       bool menu=false;
@@ -277,7 +277,7 @@ int main()
         {
           if(e.type == SDL_KEYDOWN)
           {
-            if(menu)
+            if(menu)//if we're playing the game, then these conditions apply
             {
               f++;
               if(f >= 9)f=0;
@@ -292,13 +292,11 @@ int main()
               {
                 ident=2;
                 character_x-=7;
-                //if(x < 0)x=0;
               }
               else if(ekhon == SDLK_RIGHT)
               {
                 ident=3;
                 character_x+=7;
-                //if(x > 1920)y=1920;
               }
               else f=0;
             }
@@ -323,12 +321,13 @@ int main()
         }
         if(menu)
         {
+          //If we start playing the game, this will show
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
   				SDL_RenderClear( main_renderer );
           if(road_y_1 >= 720)road_y_1=-720;
           if(road_y_2 >= 720)road_y_2 = -720;
           road.render(road_x,road_y_1,&road_rect);
-          road.render(road_x,road_y_2,&road_rect);
+          road.render(road_x,road_y_2,&road_rect);//two road tiling one after another creating an illusion of continuity
           if(ident == 0)skeleton.render(character_x,character_y,going_up+f);
           else if(ident == 1)skeleton.render(character_x,character_y,going_down+f);
           else if(ident == 2)skeleton.render(character_x,character_y,going_left+f);
@@ -337,11 +336,11 @@ int main()
         }
         else
         {
-          SDL_GetMouseState(&mx,&my);
+          SDL_GetMouseState(&mx,&my);//current mouce coordinates
           if(mx >= play_button_x && mx <= play_button_x+ button_width && my >= play_button_y && my <= play_button_y + button_height)
           {
             SDL_Delay(50);
-            p_f--;
+            p_f--;//if we hover over play button then run frames for play animation
             if(p_f< 0)p_f = 0;
             q_f++;
             if(q_f >= 6)q_f = 6;
@@ -349,24 +348,25 @@ int main()
           else if(mx >= quit_button_x && mx <= quit_button_x + button_width && my >= quit_button_y && my <= quit_button_y + button_height)
           {
             SDL_Delay(50);
-            q_f--;
+            q_f--;//if we hover over quit button then run frames for quit animation
             if(q_f < 0)q_f = 0;
             p_f++;
             if(p_f >= 6)p_f=6;
           }
           else
           {
-            p_f++;
+            p_f++;//we want to increment both frames to the last to bring animation of button to ground state
             q_f++;
             SDL_Delay(50);
             if(p_f>= 6)p_f = 6;
             if(q_f >= 6)q_f = 6;
           }
+          //This is the menu windown
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
           SDL_RenderClear( main_renderer );
-          quit_button.render(quit_button_x,quit_button_y,quit_button_array+q_f);
-          play_button.render(play_button_x,play_button_y,play_button_array+p_f);
-          logo.render(450,150,&logo_rect);
+          quit_button.render(quit_button_x,quit_button_y,quit_button_array+q_f);//quit button render
+          play_button.render(play_button_x,play_button_y,play_button_array+p_f);//play button render
+          logo.render(450,150,&logo_rect);//logo render
           SDL_RenderPresent(main_renderer);
         }
       }
