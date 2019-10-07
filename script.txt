@@ -1,0 +1,104 @@
+Codes:
+Protagonist = PTG
+Non-playable character = NPC
+Camera pan = CPAN
+Optional = OPT
+Branch (condition that triggers this branch of dialogue) [branch number] = B(c)[n]
+
+Act I: CSEDU
+Scene: Basic trees, buildings
+NPC(s): Dogs, a cat lying flat on the ground, PTG's dumb friend
+PC(s): PTG
+Mechanic: None, this would serve as a placeholder scene or a tame start point to the game.
+
+The PTG would walk his way through the map, can optionally interact with the NPCs. Other than getting to the actual map, this scene should not serve any special purpose.
+
+Design Challenges: Moderate, the scene would some non-tiled elements since the layout of the scene would not be uniform. It would certainly be a lot similar to the actual place.
+
+Coding Challenges: Low, simple event based interaction (text popups) and collision physics.
+
+Dialogues:
+PTG: Undecided
+Dog (NPC): You proceed to pat the dog with the hope of taking the next dog picture to fish likes from your 30-something Instagram followers, but the dog flips its sprite to show you the big 'ol infection it has on its skin.
+Cat (NPC): A cat lying flat on the ground, it must've tried to stupidly jump off of the nearby construction site, only to meet a failed sudoku attempt. Existence surely is hopeless.
+
+Act II: Secretariat Road Crossing
+Scene: A road, trees, traffic cones
+NPC(s): 3 rickshaws + their pullers (OPT), a CNG Autorickshaw (OPT), a red double decker
+PC(s): PTG
+
+Mechanic: Simple, the bus would start moving in the wrong direction. So there's CPAN, There would be some tiling and looping (Road marks, cones, trees on the both sides, road cracks(OPT), speedbreakers(OPT))
+
+The PTG would ask the rickshaws and CNGs for rides (OPT) and get responses that block the PTG from taking those options. So, the only remaining option would be to take the red double-decker. The PTG would take one of the furthest (from the openings) seats available in the upper floor of the bus. The bus would soon become crowded, leaving no chance to move out and then it would start moving in the opposite direction, quickly picking up momentum. This is where the actual game would start as by the time the protagonist gets to get off the bus, he would be far far away from Uttara.
+
+Dialogues:
+PTG:
+B(if he interacted with at least one NPC)[1] : "It seems that you had no option other than taking the free bus. You live in a society and it happened to force the shackles of miserly habits upon you. Now you see..."
+B(if he didn't interact with any of the NPCs)[2] : "You scornfully go for the red bus, knowing that your monthly allocations from your family would never cross two digits."
+"As you take your seat, a middle-aged man looks at you - a vile, disgusting creature - with all the contempt in the world, as your hair does not meet the required conditions set by the great alliance of middle-aged aunties and their next door neighbours."
+"Little does the judgmental boomer know that you listen to j-pop at home, you think to yourself."
+"Oh wait, why is he in this bus in the first place?"
+"Oblivious to the hypocrisy of the elderly man, the bus sets out on its own pace."
+"It's only a matter of a few seconds when you start to notice that the bus is sweeping its rackety vessel through the wrong side of the road. A few minutes pass, no sign of a detour."
+"Is this..."
+"IS THIS BUS GOING TO THE OTHER DIRECTION?, YOU SCREAM INTERNALLY AS THE DEV TURNS OFF HIS CAPS LOCK. You were so blinded by the cheap fare that you forgot to have a proper eye over the route."
+"You try to jostle your way through the bus, ultimately resulting in failure as the bus takes you on to make a not-so-sincere rendition of Finding Nemo."
+Rickshaw NPC dialogues:
+"You ask for the fare to Uttara but then realise that rickshaws aren't allowed overseas."
+"One of the rickshaws do agree to go Uttara using some secret tunnel but asks a fare that would cost an arm and a leg."
+"This guy is an amputee who lost both his arm and his leg."
+CNG (NPC): This guy looks like he's going to drag you through Mohammadpur even though you've clearly said that you wanted to go Uttara. Better avoid him.
+
+Design Challenges: Low. This is probably the easiest scene to design in the entire game.
+
+Coding Challenges: Low, popup dialogues, NPC interactions that were first introduced in the last scene. CPAN and making the road textures loop to give the false idea of speed.
+
+Act II.5: Bus minigame (OPT)
+Scene: A 2D side view of the bus, the head of the PTG
+PC: PTG
+NPC: None
+Mechanic: Rapid-fire. The player would have to rapidly press a certain button (Most presumably, 'Right') to jostle his way through the bus. There would certainly be a drag back if the inputs are too slow and it would take the PTG to the first position. The minigame would have two portions, the horizontal portion and the very brief vertical portion. Once the PTG reaches the rightmost point of the horizonal part, the right-to-left drag would stop and the bottom-to-top drag would begin, urging the user to change the rapid-fire button to 'Down'. Upon reaching the final position, the screen would fade and Act III would take place.
+
+Design Challenges: Extremely low.
+Coding Challenges: Low, or so I think.
+
+Act III: Puran Dhaka
+Scene: Tall yet poorly maintained buildings. Lots of roads lacking the space like spider webs.
+PC: PTG
+NPC: One old dude who's going to complain about the housing conditions of this place. (OPT) he's gonna disclose how much time you have until the whole scene falls apart if we're going for the timer-based approach.
+Rudimentary mechanic: Puzzler. The player would have to find his/her way through the maze and make it out of there. No timers. The exitway of the map would not be so obvious.
+Mechanic (OPT): 
+(1) Time based puzzler. The buildings would start falling over, blocking some of the pathways necessary to get across this map. The player would also have to simultaneously find his/her way though the maze within the short time to make it out of the map. The exitway of the map would not be so obvious.
+(2) The maze would keep rotating (with a pause/constantly given whichever is more playable but adds to the challenge).
+
+By the time the PTG successfully reaches the ground floor, he would be near Puran Dhaka and would have to drop there to avoid drifting further away from his destination. the first part of the scene would have a roadside view similar to that of the second scene but there would be a small road leading to the upper portion of the screen and that's where the game puzzle would begin. The NPC would be somewhere near the opening of the road.
+
+The design needs to be somewhat confusing and the exit of the maze would be shrouded by buildings leaning over each other, making it look like some sort blockade. In other words, it would be a lot similar to how hidden levels are accessed in a lot of games.
+
+Upon reaching the other end of the maze, there could be a CNG in a separate minimal scene (OPT) or another roadside view with a CNG on the same side. The separate scene can make room for more OPT NPCs.
+
+Design Challenges: Moderate, the maze design and execution of the deceptive opening can be challenging, given that we don't steal a maze from somewhere else.
+Coding Challenges: The rudimentary mechanic would be simple to implement. However, the optional mechanics can be challenging as the mask in the map would update after certain time frames. Implementing the rotation might be intermediate.
+
+Dialogues:
+Old man (NPC):
+B(Rudimentary)[1]: 
+B(Rotation)[2]: "Wewcome to Puwan Dhaka. It's basicawwy wike a wocaw bus, but fow buiwdings instead of peopwe."
+(Welcome to Puran Dhaka. It's basically like a local bus, but for buildings instead of people.)
+B(Time attack)[3]: "Hewwo, wewcome to Puwan Dhaka owo  Wegend says that whowe awea was once used by the Gwawdowfs as a huge pinbaww awcade. Whethew that's twue ow nyot, you'ww most wikewy have a minyute befowe wandom buiwdings stawt fawwing on top of each othew, bwocking youw pathway."
+(Hello, welcome to Puran Dhaka! Legend says that whole area was once used by the Gwardorfs as a huge pinball arcade. Whether that's true or not, you'll most likely have a minute before random buildings start falling on top of each other, blocking your pathway.)
+PTG:
+"It seems that you're tired from roaming across the maze. You'll have to take the CNG in front of you, no matter what."
+"The CNG driver seems to be a handsome little chap. You are affirmed by the evenness of his face and are inclined to believe that he won't piggyback off of your trust and  "
+
+Act IV: Mohammadpur
+Scene: Medium sized roads, ugly looking buildings from over a decade ago, medium sized roads better make some room for cast shadows that resulted from the buildings.
+NPCs: Muggers, A drug dealer (OPT), CNG driver, gang members.
+
+Mechanic: Stealth. You have to hide in the shadows cast by the buildings and avoid being spotted by the enemy while it's facing your way.
+
+This part would require some animation. The CNG would come to Mohammadpur, offering another roadside view. After stopping there, the driver would come out and whistle. Then other NPCs (gang members) would appear from the edges of the screen, move towards the CNG and stop there. There would some dialogues after that, followed by a cloud and a bunch of stars to give the impression of them beating you up. After the smoke cloud clears out, the CNG would make a move towards the edge of the screen and disappear.
+
+"The CNG has stopped at Mohammadpur."
+"Turns out that the driver has links with the local gangs. If you haven't guessed from the text on the screen yet, you are doomed."
+"With a blunt hit on your head, they run off with your wallet, your phone and your will to live."
