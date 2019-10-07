@@ -3,12 +3,12 @@
 #include <SDL2/SDL_image.h>
 #include <string>
 #define ekhon e.key.keysym.sym
-const int SW = 1920;
-const int SH = 1080;
+const int SW = 1280;
+const int SH = 720;
 const int walking = 9;
 const int button_animation = 7;
-const int button_height = 237;
-const int button_width = 726;
+const int button_height = 119;
+const int button_width = 323;
 SDL_Rect going_up[walking];
 SDL_Rect going_down[walking];
 SDL_Rect going_left[walking];
@@ -16,6 +16,7 @@ SDL_Rect going_right[walking];
 SDL_Rect play_button_array[button_animation];
 SDL_Rect quit_button_array[button_animation];
 SDL_Rect logo_rect;
+SDL_Rect road_rect;
 class texture_jinish
 {
   public:
@@ -34,7 +35,7 @@ class texture_jinish
     int mWidth,mHeight;
 
 };
-texture_jinish skeleton,play_button,quit_button,logo;
+texture_jinish skeleton,play_button,quit_button,logo,road;
 bool init();//Initialization
 bool loadMedia();//loads media
 void close();//memory saving before closing
@@ -156,7 +157,7 @@ bool init()
 bool loadMedia()
 {
   bool s = true;
-  if(!skeleton.loadFromFile("skeleton.png") || !logo.loadFromFile("logo.png"))
+  if(!skeleton.loadFromFile("skeleton.png") || !logo.loadFromFile("logo.png") || !road.loadFromFile("road.png"))
   {
     printf( "Failed to load walking animation texture!\n" );
 		s = false;
@@ -170,10 +171,14 @@ bool loadMedia()
     }
     else
     {
-      logo_rect.x = 300;
-      logo_rect.y = 95;
-      logo_rect.h =485-95;
-      logo_rect.w = 975-300;
+      road_rect.x = 0;
+      road_rect.y = 0;
+      road_rect.h =720;
+      road_rect.w = 600;
+      logo_rect.x = 150;
+      logo_rect.y = 48;
+      logo_rect.h =243-48;
+      logo_rect.w = 488-150;
       int hx = 17,hy = 15,inter = 64;
       int hh=46,ww=30;
       for(int w=0;w<walking;w++)
@@ -214,7 +219,7 @@ bool loadMedia()
         going_right[w].w = ww;
         hx += inter;
       }
-      hx = 0,hy=0,inter=726,hh=237,ww=726;
+      hx = 0,hy=0,inter=323,hh=119,ww=112;
       for(int w=0;w<button_animation;w++)
       {
         play_button_array[w].x = hx;
@@ -223,7 +228,7 @@ bool loadMedia()
         play_button_array[w].w = ww;
         hx += inter;
       }
-      hx = 0,hy=0,inter=726,hh=237,ww=726;
+      hx = 0,hy=0,inter=323,hh=119,ww=112;
       for(int w=0;w<button_animation;w++)
       {
         quit_button_array[w].x = hx;
@@ -256,7 +261,10 @@ int main()
     else
     {
       SDL_Event e;
-      int ident=0,f=0,x=150,y=150,p_f=6,q_f=6;
+      int ident=0,f=0,p_f=6,q_f=6;
+      int character_x = 390,character_y=600;
+      int road_x = 390,road_y_1 = 0,road_y_2=-720;
+      //bool switch_it = false;
       int mx,my;
       bool quit = false;
       bool menu=false;
@@ -273,26 +281,21 @@ int main()
               if(ekhon == SDLK_UP)
               {
                 ident=0;
-                y-=7;
-                if(y < 0)y=0;
-              }
-              else if(ekhon == SDLK_DOWN)
-              {
-                ident=1;
-                y+=7;
-                if(y > 1080)y=1080;
+                road_y_1+=5;
+                road_y_2 += 5;
+
               }
               else if(ekhon == SDLK_LEFT)
               {
                 ident=2;
-                x-=7;
-                if(x < 0)x=0;
+                character_x-=7;
+                //if(x < 0)x=0;
               }
               else if(ekhon == SDLK_RIGHT)
               {
                 ident=3;
-                x+=7;
-                if(x > 1920)y=1920;
+                character_x+=7;
+                //if(x > 1920)y=1920;
               }
               else f=0;
             }
@@ -300,11 +303,11 @@ int main()
           else if(e.type == SDL_MOUSEBUTTONDOWN)
           {
             SDL_GetMouseState(&mx,&my);
-            if(mx >= 600 && mx <= 600+ button_width && my >= 450 && my <= 450 + button_height)
+            if(mx >= 325 && mx <= 325+ button_width && my >= 350 && my <= 350 + button_height)
             {
               menu = true;
             }
-            else if(mx >= 600 && mx <= 600 + button_width && my >= 600 && my <= 600 + button_height)
+            else if(mx >= 325 && mx <= 325 + button_width && my >= 500 && my <= 500 + button_height)
             {
               quit = true;
             }
@@ -314,28 +317,34 @@ int main()
             quit = true;
           }
 
-
         }
         if(menu)
         {
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
   				SDL_RenderClear( main_renderer );
-          if(ident == 0)skeleton.render(x,y,going_up+f);
-          else if(ident == 1)skeleton.render(x,y,going_down+f);
-          else if(ident == 2)skeleton.render(x,y,going_left+f);
-          else if(ident == 3)skeleton.render(x,y,going_right+f);
+          if(road_y_1 >= 720)road_y_1=-720;
+          if(road_y_2 >= 720)road_y_2 = -720;
+          road.render(road_x,road_y_1,&road_rect);
+          road.render(road_x,road_y_2,&road_rect);
+
+
+
+          if(ident == 0)skeleton.render(character_x,character_y,going_up+f);
+          else if(ident == 1)skeleton.render(character_x,character_y,going_down+f);
+          else if(ident == 2)skeleton.render(character_x,character_y,going_left+f);
+          else if(ident == 3)skeleton.render(character_x,character_y,going_right+f);
           SDL_RenderPresent(main_renderer);
         }
         else
         {
           SDL_GetMouseState(&mx,&my);
-          if(mx >= 600 && mx <= 600+ button_width && my >= 450 && my <= 450 + button_height)
+          if(mx >= 325 && mx <= 325+ button_width && my >= 350 && my <= 350 + button_height)
           {
             SDL_Delay(50);
             p_f--;
             if(p_f< 0)p_f = 0;
           }
-          else if(mx >= 600 && mx <= 600 + button_width && my >= 600 && my <= 600 + button_height)
+          else if(mx >= 325 && mx <= 325 + button_width && my >= 500 && my <= 500 + button_height)
           {
             SDL_Delay(50);
             q_f--;
@@ -351,9 +360,9 @@ int main()
           }
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
           SDL_RenderClear( main_renderer );
-          quit_button.render(600,600,quit_button_array+q_f);
-          play_button.render(600,450,play_button_array+p_f);
-          logo.render(650,100,&logo_rect);
+          quit_button.render(250,450,quit_button_array+q_f);
+          play_button.render(250,350,play_button_array+p_f);
+          logo.render(150,150,&logo_rect);
           SDL_RenderPresent(main_renderer);
         }
       }
