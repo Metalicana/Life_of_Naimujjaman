@@ -6,11 +6,15 @@
 const int SW = 1920;
 const int SH = 1080;
 const int walking = 9;
+const int button_animation = 6;
+const int button_height = 237;
+const int button_width = 726;
 SDL_Rect going_up[walking];
 SDL_Rect going_down[walking];
 SDL_Rect going_left[walking];
 SDL_Rect going_right[walking];
-SDL_Rect play_button_rect;
+SDL_Rect play_button_array[button_animation];
+SDL_Rect quit_button_array[button_animation];
 class texture_jinish
 {
   public:
@@ -158,17 +162,13 @@ bool loadMedia()
   }
   else
   {
-    if(!play_button.loadFromFile("play.png"))
+    if(!play_button.loadFromFile("play_btn_sprite.png") || !quit_button.loadFromFile("quit_btn_sprite.png") )
     {
         printf( "Failed to load play button texture!\n" );
     		s = false;
     }
     else
     {
-      play_button_rect.x = 0;
-      play_button_rect.y = 0;
-      play_button_rect.w = 220;
-      play_button_rect.h = 220;
       int hx = 17,hy = 15,inter = 64;
       int hh=46,ww=30;
       for(int w=0;w<walking;w++)
@@ -209,6 +209,24 @@ bool loadMedia()
         going_right[w].w = ww;
         hx += inter;
       }
+      hx = 0,hy=0,inter=726,hh=237,ww=726;
+      for(int w=0;w<button_animation;w++)
+      {
+        play_button_array[w].x = hx;
+        play_button_array[w].y = hy;
+        play_button_array[w].h=hh;
+        play_button_array[w].w = ww;
+        hx += inter;
+      }
+      hx = 0,hy=0,inter=726,hh=237,ww=726;
+      for(int w=0;w<button_animation;w++)
+      {
+        quit_button_array[w].x = hx;
+        quit_button_array[w].y = hy;
+        quit_button_array[w].h=hh;
+        quit_button_array[w].w = ww;
+        hx += inter;
+      }
     }
 
   }
@@ -233,7 +251,7 @@ int main()
     else
     {
       SDL_Event e;
-      int ident=0,f=0,x=150,y=150;
+      int ident=0,f=0,x=150,y=150,p_f=0,q_f=0;
       int mx,my;
       bool quit = false;
       bool menu=false;
@@ -274,16 +292,24 @@ int main()
               else f=0;
             }
           }
-          else if(e.type == SDL_MOUSEBUTTONUP)
+          else if(e.type == SDL_MOUSEBUTTONDOWN)
           {
             SDL_GetMouseState(&mx,&my);
-            if(mx >= SW/4 && mx <= SW/4+220 && my >= SH/4 && my <= SH/4+220)menu=true;
-            //menu = true;
+            if(mx >= SW/2 && mx <= SW/2 + button_width && my >= SH/3 && my <= SH/3 + button_height)
+            {
+              menu = true;
+            }
+            else if(mx >= SW/2 && mx <= SW/2 + button_width && my >= SH/2 && my <= SH/2 + button_height)
+            {
+              quit = true;
+            }
           }
           else if(e.type == SDL_QUIT)
           {
             quit = true;
           }
+
+
         }
         if(menu)
         {
@@ -297,10 +323,29 @@ int main()
         }
         else
         {
-          SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xAA, 0xAA, 0xAA );
-          SDL_Rect *play = &play_button_rect;
+          SDL_GetMouseState(&mx,&my);
+          if(mx >= SW/2 && mx <= SW/2 + button_width && my >= SH/3 && my <= SH/3 + button_height)
+          {
+            p_f++;
+            if(p_f>= 7)p_f = 6;
+          }
+          else if(mx >= SW/2 && mx <= SW/2 + button_width && my >= SH/2 && my <= SH/2 + button_height)
+          {
+            q_f++;
+            if(q_f >= 7)q_f = 6;
+          }
+          else
+          {
+            p_f--;
+            q_f--;
+            if(p_f < 0)p_f = 0;
+            if(q_f < 0)q_f = 0;
+          }
+          SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
           SDL_RenderClear( main_renderer );
-          play_button.render(SW/4,SH/4,play);
+          quit_button.render(SW/2,SH/2,quit_button_array+q_f);
+          play_button.render(SW/2,SH/3,play_button_array+p_f);
+
           SDL_RenderPresent(main_renderer);
         }
       }
