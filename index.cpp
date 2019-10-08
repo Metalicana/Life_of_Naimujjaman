@@ -11,6 +11,7 @@ const int button_height = 119;
 const int button_width = 323;
 const int play_button_x =450,play_button_y = 400;
 const int quit_button_x = 450,quit_button_y = 500;
+const int fps = 8;
 
 SDL_Rect going_up[walking];
 SDL_Rect going_down[walking];
@@ -20,7 +21,7 @@ SDL_Rect play_button_array[button_animation];
 SDL_Rect quit_button_array[button_animation];
 SDL_Rect logo_rect;
 SDL_Rect road_rect;
-
+SDL_Rect side_walk_rect,side_walk_rect_2;
 class texture_jinish
 {
   public:
@@ -39,7 +40,7 @@ class texture_jinish
     int mWidth,mHeight;//main width and height
 
 };
-texture_jinish skeleton,play_button,quit_button,logo,road;//textures
+texture_jinish skeleton,play_button,quit_button,logo,road,side_walk,side_walk_2;//textures
 bool init();//Initialization
 bool loadMedia();//loads media
 void close();//memory saving before closing
@@ -175,72 +176,77 @@ bool loadMedia()
     }
     else
     {
-      road_rect.x = 0;
-      road_rect.y = 0;
-      road_rect.h =720;
-      road_rect.w = 600;
-      logo_rect.x = 150;
-      logo_rect.y = 48;
-      logo_rect.h =243-48;
-      logo_rect.w = 488-150;
-      int hx = 17,hy = 15,inter = 64;
-      int hh=46,ww=30;
-      for(int w=0;w<walking;w++)
+      if(!side_walk.loadFromFile("sidewalk_left.png") || !side_walk_2.loadFromFile("sidewalk_right.png"))
       {
-        going_up[w].x = hx;
-        going_up[w].y = hy;
-        going_up[w].h=hh;
-        going_up[w].w = ww;
-        hx += inter;
+        printf( "Failed to load play button texture!\n" );
+    		s = false;
       }
-      hx = 19,hy=79,inter=64;
-      hh=47,ww=24;
-      for(int w=0;w<walking;w++)
+      else
       {
-        going_left[w].x = hx;
-        going_left[w].y = hy;
-        going_left[w].h=hh;
-        going_left[w].w = ww;
-        hx += inter;
+        road_rect.x = 0;road_rect.y = 0;road_rect.h =1440;road_rect.w = 600;
+        logo_rect.x = 150;logo_rect.y = 48;logo_rect.h =243-48;logo_rect.w = 488-150;
+        side_walk_rect.x =0,side_walk_rect.y=0,side_walk_rect.h=1440,side_walk_rect.w=170;
+        side_walk_rect_2.x =0,side_walk_rect_2.y=0,side_walk_rect_2.h=1440,side_walk_rect_2.w=170;
+        int hx = 0,hy = 0,inter = 90;
+        int hh=110,ww=90;
+        for(int w=0;w<walking;w++)
+        {
+          going_up[w].x = hx;
+          going_up[w].y = hy;
+          going_up[w].h=hh;
+          going_up[w].w = ww;
+          hx += inter;
+        }
+        hx = 0,hy=110,inter=90;
+        hh=110,ww=90;
+        for(int w=0;w<walking;w++)
+        {
+          going_left[w].x = hx;
+          going_left[w].y = hy;
+          going_left[w].h=hh;
+          going_left[w].w = ww;
+          hx += inter;
+        }
+        hx = 0,hy=220,inter=90;
+        hh=110,ww=90;
+        for(int w=0;w<walking;w++)
+        {
+          going_down[w].x = hx;
+          going_down[w].y = hy;
+          going_down[w].h=hh;
+          going_down[w].w = ww;
+          hx += inter;
+        }
+        hx = 0,hy=330,inter=90;
+        hh=110,ww=90;
+        for(int w=0;w<walking;w++)
+        {
+          going_right[w].x = hx;
+          going_right[w].y = hy;
+          going_right[w].h=hh;
+          going_right[w].w = ww;
+          hx += inter;
+        }
+        hx = 0,hy=0,inter=363,hh=119,ww=360;
+        for(int w=0;w<button_animation;w++)
+        {
+          play_button_array[w].x = hx;
+          play_button_array[w].y = hy;
+          play_button_array[w].h=hh;
+          play_button_array[w].w = ww;
+          hx += inter;
+        }
+        hx = 0,hy=0,inter=363,hh=119,ww=360;
+        for(int w=0;w<button_animation;w++)
+        {
+          quit_button_array[w].x = hx;
+          quit_button_array[w].y = hy;
+          quit_button_array[w].h=hh;
+          quit_button_array[w].w = ww;
+          hx += inter;
+        }
       }
-      hx = 17,hy=143,inter=64;
-      hh=47,ww=30;
-      for(int w=0;w<walking;w++)
-      {
-        going_down[w].x = hx;
-        going_down[w].y = hy;
-        going_down[w].h=hh;
-        going_down[w].w = ww;
-        hx += inter;
-      }
-      hx = 19,hy=207,inter=64;
-      hh=47,ww=24;
-      for(int w=0;w<walking;w++)
-      {
-        going_right[w].x = hx;
-        going_right[w].y = hy;
-        going_right[w].h=hh;
-        going_right[w].w = ww;
-        hx += inter;
-      }
-      hx = 0,hy=0,inter=363,hh=119,ww=360;
-      for(int w=0;w<button_animation;w++)
-      {
-        play_button_array[w].x = hx;
-        play_button_array[w].y = hy;
-        play_button_array[w].h=hh;
-        play_button_array[w].w = ww;
-        hx += inter;
-      }
-      hx = 0,hy=0,inter=363,hh=119,ww=360;
-      for(int w=0;w<button_animation;w++)
-      {
-        quit_button_array[w].x = hx;
-        quit_button_array[w].y = hy;
-        quit_button_array[w].h=hh;
-        quit_button_array[w].w = ww;
-        hx += inter;
-      }
+
     }
 
   }
@@ -266,8 +272,10 @@ int main(int argc,char *argv[])
     {
       SDL_Event e;
       int ident=0,f=0,p_f=6,q_f=6;
+      int side_walk_y_1 = 0,side_walk_y_2=-1440;
+      int side_walk_y_3 = 0,side_walk_y_4 = -1440;
       int character_x = 390,character_y=600;
-      int road_x = 340,road_y_1 = 0,road_y_2=-720;
+      int road_x = 340,road_y_1 = 0,road_y_2=-1440;
       int mx,my;
       bool quit = false;
       bool menu=false;
@@ -284,14 +292,29 @@ int main(int argc,char *argv[])
               if(ekhon == SDLK_UP)
               {
                 ident=0;
-                road_y_1+=10;
-                road_y_2 +=10;
+                if(character_y <= 360)
+                {
+                  road_y_1+=fps;
+                  road_y_2 +=fps;
+                  side_walk_y_1 += fps;
+                  side_walk_y_2 += fps;
+                  side_walk_y_3 += fps;
+                  side_walk_y_4 += fps;
+                }
+                else character_y -= fps;
 
+              }
+              else if(ekhon == SDLK_DOWN)
+              {
+                character_y += fps;
+
+                if(character_y >= 680)character_y=680;
+                ident =1;
               }
               else if(ekhon == SDLK_LEFT)
               {
                 ident=2;
-                character_x-=7;
+                character_x-=fps;
               }
               else if(ekhon == SDLK_RIGHT)
               {
@@ -324,10 +347,22 @@ int main(int argc,char *argv[])
           //If we start playing the game, this will show
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
   				SDL_RenderClear( main_renderer );
-          if(road_y_1 >= 720)road_y_1=-720;
-          if(road_y_2 >= 720)road_y_2 = -720;
+          if(road_y_1 >= 1440)road_y_1=-1440;
+          if(road_y_2 >= 1440)road_y_2 = -1440;
+          if(side_walk_y_1 >= 1440)side_walk_y_1=-1440;
+          if(side_walk_y_2 >= 1440)side_walk_y_2=-1440;
+          if(side_walk_y_3 >= 1440)side_walk_y_3=-1440;
+          if(side_walk_y_4 >= 1440)side_walk_y_4=-1440;
           road.render(road_x,road_y_1,&road_rect);
           road.render(road_x,road_y_2,&road_rect);//two road tiling one after another creating an illusion of continuity
+          side_walk.render(road_x-170,side_walk_y_1,&side_walk_rect);
+          side_walk.render(road_x - 170,side_walk_y_2,&side_walk_rect);
+          side_walk_2.render(road_x+600,side_walk_y_3,&side_walk_rect_2);
+          side_walk_2.render(road_x+600,side_walk_y_4,&side_walk_rect_2);
+          if(character_x < 0)character_x = 0;
+          if(character_x > 1280)character_x = 1280;
+          if(character_y < 0)character_y = 0;
+          if(character_y > 720)character_y = 720;
           if(ident == 0)skeleton.render(character_x,character_y,going_up+f);
           else if(ident == 1)skeleton.render(character_x,character_y,going_down+f);
           else if(ident == 2)skeleton.render(character_x,character_y,going_left+f);
