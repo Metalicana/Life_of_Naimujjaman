@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <map>
 #include <string>
+#include <time.h>
+#include <stdlib.h>
 #define ekhon e.key.keysym.sym
 const int SW = 1280;
 const int SH = 720;
@@ -11,7 +14,7 @@ const int button_height = 119;
 const int button_width = 323;
 const int play_button_x =450,play_button_y = 400;
 const int quit_button_x = 450,quit_button_y = 500;
-const int fps = 8;
+const int fps = 10;
 
 SDL_Rect going_up[walking];
 SDL_Rect going_down[walking];
@@ -19,6 +22,8 @@ SDL_Rect going_left[walking];
 SDL_Rect going_right[walking];
 SDL_Rect play_button_array[button_animation];
 SDL_Rect quit_button_array[button_animation];
+SDL_Rect vehichle_up[8];
+SDL_Rect vehichle_down[8];
 SDL_Rect logo_rect;
 SDL_Rect road_rect;
 SDL_Rect side_walk_rect,side_walk_rect_2;
@@ -40,7 +45,25 @@ class texture_jinish
     int mWidth,mHeight;//main width and height
 
 };
-texture_jinish skeleton,play_button,quit_button,logo,road,side_walk,side_walk_2;//textures
+class timer
+{
+public:
+  timer();
+  void start();
+  void stop();
+  void pause();
+  void unpause();
+  Uint32 getTicks();
+  bool is_started();
+  bool is_paused();
+private:
+  Uint32 mStartTicks;
+  Uint32 mPausedTicks;
+  bool mPaused,mStarted;
+};
+
+texture_jinish skeleton,play_button,quit_button,logo,road,side_walk,side_walk_2,bahon;//textures
+timer clock_release,clock_move;
 bool init();//Initialization
 bool loadMedia();//loads media
 void close();//memory saving before closing
@@ -116,6 +139,63 @@ int texture_jinish::getW()
 {
   return mWidth;
 }
+timer::timer()
+{
+  mStartTicks = 0,mPausedTicks=0,mPaused=false,mStarted=false;
+}
+void timer::start()
+{
+  mStarted=true,mPaused=false,mStartTicks=SDL_GetTicks(),mPausedTicks=0;
+}
+void timer::stop()
+{
+  mStarted = false;
+  mPaused = false;
+  mStartTicks = 0;
+  mPausedTicks=0;
+}
+void timer::pause()
+{
+  if(mStarted && !mPaused)
+  {
+    mPaused = true;
+    mPausedTicks = SDL_GetTicks()-mStartTicks;
+    mStartTicks=0;
+  }
+}
+void timer::unpause()
+{
+  if(mStarted && mPaused)
+  {
+    mPaused = false;
+    mStartTicks = SDL_GetTicks()-mPausedTicks;
+    mPausedTicks = 0;
+  }
+}
+Uint32 timer::getTicks()
+{
+  Uint32 time = 0;
+  if(mStarted)
+  {
+    if(mPaused)
+    {
+      time = mPausedTicks;
+    }
+    else
+    {
+      time = SDL_GetTicks()-mStartTicks;
+    }
+  }
+  return time;
+}
+bool timer::is_started()
+{
+  return mStarted;
+}
+bool timer::is_paused()
+{
+  return mPaused;
+}
 bool init()
 {
   bool s = true;
@@ -159,6 +239,21 @@ bool init()
   }
   return s;
 }
+bool is_colliding(int x1,int y1,int x2,int y2)
+{
+  int x_1_left = x1;int x_1_right = x1+90;
+  int y_1_left = y1+110;int y_1_right = y1;
+  int x_2_left = x2;int x_2_right = x2+90;
+  int y_2_left = y2+200;int y_2_right = y2;
+  int x,y;
+  x = std::max(x_1_left, x_2_left);
+  int xx = std::min(x_1_right,x_2_right);
+  if(x > xx )return false;
+  y = std::min(y_1_left,y_2_left);
+  int yy = std::max(y_1_right,y_2_right);
+  if(y < yy)return false;
+  return true;
+}
 bool loadMedia()
 {
   bool s = true;
@@ -169,7 +264,7 @@ bool loadMedia()
   }
   else
   {
-    if(!play_button.loadFromFile("play_btn_sprite.png") || !quit_button.loadFromFile("quit_btn_sprite.png") )
+    if(!play_button.loadFromFile("play_btn_sprite.png") || !quit_button.loadFromFile("quit_btn_sprite.png")||!bahon.loadFromFile("car.png") )
     {
         printf( "Failed to load play button texture!\n" );
     		s = false;
@@ -246,6 +341,10 @@ bool loadMedia()
           hx += inter;
         }
       }
+      for(int w=0;w<8;w++)
+      {
+        vehichle_up[w].x = 0,vehichle_up[w].y=0,vehichle_up[w].w=90,vehichle_up[w].h=200;
+      }
 
     }
 
@@ -274,22 +373,27 @@ int main(int argc,char *argv[])
       int ident=0,f=0,p_f=6,q_f=6;
       int side_walk_y_1 = 0,side_walk_y_2=-1440;
       int side_walk_y_3 = 0,side_walk_y_4 = -1440;
-      int character_x = 390,character_y=600;
+      int character_x = 15,character_y=600;
       int road_x = 340,road_y_1 = 0,road_y_2=-1440;
       int mx,my;
       bool quit = false;
       bool menu=false;
+      bool marker_up[8];
+      int car_up = 0;
+      for(int w=0;w<8;w++)marker_up[w]=0;
+      int ypos_up[8];
+      for(int w=0;w<8;w++)ypos_up[w]=920;
+
       while(!quit)
       {
+        const Uint8 *state = SDL_GetKeyboardState(NULL);
         while(SDL_PollEvent(&e))
         {
-          if(e.type == SDL_KEYDOWN)
+          if(e.type == SDL_KEYDOWN || e.type == SDL_KEYUP)
           {
             if(menu)//if we're playing the game, then these conditions apply
             {
-              f++;
-              if(f >= 9)f=0;
-              if(ekhon == SDLK_UP)
+              if(state[SDL_SCANCODE_UP])
               {
                 ident=0;
                 if(character_y <= 360)
@@ -302,33 +406,56 @@ int main(int argc,char *argv[])
                   side_walk_y_4 += fps;
                 }
                 else character_y -= fps;
+                if(state[SDL_SCANCODE_LEFT])
+                {
+                  ident=2;
+                  character_x-=fps;
+                }
+                else if(state[SDL_SCANCODE_RIGHT])
+                {
+                  ident=3;
+                  character_x+=fps;
+                }
 
               }
-              else if(ekhon == SDLK_DOWN)
+              else if(state[SDL_SCANCODE_DOWN])
               {
                 character_y += fps;
-
                 if(character_y >= 680)character_y=680;
                 ident =1;
+                if(state[SDL_SCANCODE_LEFT])
+                {
+                  ident=2;
+                  character_x-=fps;
+                }
+                else if(state[SDL_SCANCODE_RIGHT])
+                {
+                  ident=3;
+                  character_x+=fps;
+                }
               }
-              else if(ekhon == SDLK_LEFT)
+              else if(state[SDL_SCANCODE_LEFT])
               {
                 ident=2;
                 character_x-=fps;
               }
-              else if(ekhon == SDLK_RIGHT)
+              else if(state[SDL_SCANCODE_RIGHT])
               {
                 ident=3;
-                character_x+=7;
+                character_x+=fps;
               }
-              else f=0;
+              f++;
+              if(f >= 9)f=0;
             }
           }
-          else if(e.type == SDL_MOUSEBUTTONDOWN)
+
+          if(e.type == SDL_MOUSEBUTTONDOWN)
           {
             SDL_GetMouseState(&mx,&my);
             if(mx >= play_button_x && mx <= play_button_x+ button_width && my >= play_button_y && my <= play_button_y + button_height)
             {
+              clock_release.start();
+              clock_move.start();
               menu = true;
             }
             else if(mx >= quit_button_x && mx <= quit_button_x + button_width && my >= quit_button_y && my <= quit_button_y + button_height)
@@ -347,6 +474,41 @@ int main(int argc,char *argv[])
           //If we start playing the game, this will show
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
   				SDL_RenderClear( main_renderer );
+          srand(time(NULL));
+           if(car_up >= 8)car_up = 0;
+           if(clock_release.getTicks()%1200 == 0 && rand()%15<10)
+           {
+             marker_up[car_up++]=1;
+           }
+           for(int w=0;w<8;w++)
+           {
+             if(is_colliding(character_x,character_y,450,ypos_up[w]))
+             {
+               menu = false;
+             }
+           }
+           if(clock_move.getTicks()%25==0 || clock_move.getTicks()%25 ==  1)
+           {
+             for(int w=0;w<8;w++)
+             {
+               if(marker_up[w])
+               {
+                 ypos_up[w]-=1;
+               }
+             }
+           }
+           //SDL_Delay(1);
+           for(int w=0;w<8;w++)
+           {
+             if(marker_up[w]==1)
+             {
+               if(character_y-ypos_up[w] > 720)
+               {
+                 marker_up[w]=0;
+                 ypos_up[w]=920;
+               }
+             }
+           }
           if(road_y_1 >= 1440)road_y_1=-1440;
           if(road_y_2 >= 1440)road_y_2 = -1440;
           if(side_walk_y_1 >= 1440)side_walk_y_1=-1440;
@@ -367,6 +529,10 @@ int main(int argc,char *argv[])
           else if(ident == 1)skeleton.render(character_x,character_y,going_down+f);
           else if(ident == 2)skeleton.render(character_x,character_y,going_left+f);
           else if(ident == 3)skeleton.render(character_x,character_y,going_right+f);
+          for(int w=0;w<8;w++)
+          {
+            if(marker_up[w]== 1)bahon.render(450,ypos_up[w],&vehichle_up[w]);
+          }
           SDL_RenderPresent(main_renderer);
         }
         else
