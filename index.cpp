@@ -6,6 +6,8 @@
 #include <time.h>
 #include <stdlib.h>
 #define ekhon e.key.keysym.sym
+#define hover1 mx >= play_button_x && mx <= play_button_x+ button_width && my >= play_button_y && my <= play_button_y + button_height
+#define hover2 mx >= quit_button_x && mx <= quit_button_x + button_width && my >= quit_button_y && my <= quit_button_y + button_height
 const int SW = 1280;
 const int SH = 720;
 const int walking = 9;
@@ -15,18 +17,26 @@ const int button_width = 323;
 const int play_button_x =450,play_button_y = 400;
 const int quit_button_x = 450,quit_button_y = 500;
 const int fps = 10;
-
+const int car_height = 200;
+const int car_width = 90;
+const int bus_height = 200;
+const int bus_width = 90;
+const int dd_height = 200;
+const int dd_width = 90;
+const int cng_height = 200;
+const int cng_width = 90;
 SDL_Rect going_up[walking];
 SDL_Rect going_down[walking];
 SDL_Rect going_left[walking];
 SDL_Rect going_right[walking];
 SDL_Rect play_button_array[button_animation];
 SDL_Rect quit_button_array[button_animation];
-SDL_Rect vehichle_up[8];
-SDL_Rect vehichle_down[8];
+SDL_Rect vehichle_up[4];
+SDL_Rect vehichle_down[4];
 SDL_Rect logo_rect;
 SDL_Rect road_rect;
 SDL_Rect side_walk_rect,side_walk_rect_2;
+
 class texture_jinish
 {
   public:
@@ -62,7 +72,9 @@ private:
   bool mPaused,mStarted;
 };
 
-texture_jinish skeleton,play_button,quit_button,logo,road,side_walk,side_walk_2,bahon;//textures
+texture_jinish skeleton,play_button,quit_button,logo,road,side_walk,side_walk_2;//textures
+texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
+texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
 timer clock_release,clock_move;
 bool init();//Initialization
 bool loadMedia();//loads media
@@ -102,12 +114,12 @@ bool texture_jinish::loadFromFile(std::string path)
 void texture_jinish::free()
 {
   if( mTexture != NULL )
-	{
-		SDL_DestroyTexture( mTexture );
-		mTexture = NULL;
-		mWidth = 0;
-		mHeight = 0;
-	}
+  {
+    SDL_DestroyTexture( mTexture );
+    mTexture = NULL;
+    mWidth = 0;
+    mHeight = 0;
+  }
 }//shortcuts below
 void texture_jinish::setColor(Uint8 red,Uint8 blue, Uint8 green)
 {
@@ -214,7 +226,7 @@ bool init()
     if(main_window ==NULL)
     {
       printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
-			s = false;
+      s = false;
     }
     else
     {
@@ -222,7 +234,7 @@ bool init()
       if(main_renderer == NULL)
       {
         printf( "Renderer could not be created! SDL Error: %s\n", SDL_GetError() );
-				s = false;
+        s = false;
       }
       else
       {
@@ -231,7 +243,7 @@ bool init()
         if(!(IMG_Init(imgFlags) && imgFlags))
         {
           printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
-					s = false;
+          s = false;
         }
 
       }
@@ -257,31 +269,25 @@ bool is_colliding(int x1,int y1,int x2,int y2)
 bool loadMedia()
 {
   bool s = true;
-  if(!skeleton.loadFromFile("skeleton.png") || !logo.loadFromFile("logo.png") || !road.loadFromFile("road.png"))
-  {
-    printf( "Failed to load walking animation texture!\n" );
-		s = false;
-  }
-  else
-  {
-    if(!play_button.loadFromFile("play_btn_sprite.png") || !quit_button.loadFromFile("quit_btn_sprite.png")||!bahon.loadFromFile("car.png") )
-    {
-        printf( "Failed to load play button texture!\n" );
-    		s = false;
-    }
-    else
-    {
-      if(!side_walk.loadFromFile("sidewalk_left.png") || !side_walk_2.loadFromFile("sidewalk_right.png"))
-      {
-        printf( "Failed to load play button texture!\n" );
-    		s = false;
-      }
-      else
-      {
-        road_rect.x = 0;road_rect.y = 0;road_rect.h =1440;road_rect.w = 600;
-        logo_rect.x = 150;logo_rect.y = 48;logo_rect.h =243-48;logo_rect.w = 488-150;
-        side_walk_rect.x =0,side_walk_rect.y=0,side_walk_rect.h=1440,side_walk_rect.w=170;
-        side_walk_rect_2.x =0,side_walk_rect_2.y=0,side_walk_rect_2.h=1440,side_walk_rect_2.w=170;
+  s = s & skeleton.loadFromFile("skeleton.png");
+  s = s & logo.loadFromFile("logo.png");
+  s = s & road.loadFromFile("road.png");
+  s = s & play_button.loadFromFile("play_btn_sprite.png");
+  s = s & quit_button.loadFromFile("quit_btn_sprite.png");
+  s = s & side_walk.loadFromFile("sidewalk_left.png");
+  s = s & side_walk_2.loadFromFile("sidewalk_right.png");
+  s = s & gari_up.loadFromFile("car1.png");
+  s = s & bus_up.loadFromFile("bus1.png");
+  s = s & dotola_bus_up.loadFromFile("dd1.png");
+  s = s & cng_up.loadFromFile("cng1.png");
+  s = s & gari_down.loadFromFile("car2.png");
+  s = s & bus_down.loadFromFile("bus2.png");
+  s = s & dotola_bus_down.loadFromFile("dd2.png");
+  s = s & cng_down.loadFromFile("cng2.png");
+  road_rect.x = 0;road_rect.y = 0;road_rect.h =1440;road_rect.w = 600;
+  logo_rect.x = 150;logo_rect.y = 48;logo_rect.h =243-48;logo_rect.w = 488-150;
+  side_walk_rect.x =0,side_walk_rect.y=0,side_walk_rect.h=1440,side_walk_rect.w=170;
+  side_walk_rect_2.x =0,side_walk_rect_2.y=0,side_walk_rect_2.h=1440,side_walk_rect_2.w=170;
         int hx = 0,hy = 0,inter = 90;
         int hh=110,ww=90;
         for(int w=0;w<walking;w++)
@@ -340,19 +346,22 @@ bool loadMedia()
           quit_button_array[w].w = ww;
           hx += inter;
         }
-      }
-      for(int w=0;w<8;w++)
-      {
-        vehichle_up[w].x = 0,vehichle_up[w].y=0,vehichle_up[w].w=90,vehichle_up[w].h=200;
-      }
 
-    }
-
-  }
+      vehichle_up[0].x = vehichle_up[0].y = 0;vehichle_up[0].h = car_height;vehichle_up[0].w=car_width;
+      vehichle_up[1].x = vehichle_up[1].y = 0;vehichle_up[1].h = bus_height;vehichle_up[1].w=bus_width;
+      vehichle_up[2].x = vehichle_up[2].y = 0;vehichle_up[2].h = dd_height;vehichle_up[2].w=dd_width;
+      vehichle_up[3].x = vehichle_up[3].y = 0;vehichle_up[3].h = cng_height;vehichle_up[3].w=cng_width;
+      vehichle_down[0].x = vehichle_down[0].y = 0;vehichle_down[0].h = car_height;vehichle_down[0].w=car_width;
+      vehichle_down[1].x = vehichle_down[1].y = 0;vehichle_down[1].h = bus_height;vehichle_down[1].w=bus_width;
+      vehichle_down[2].x = vehichle_down[2].y = 0;vehichle_down[2].h = dd_height;vehichle_down[2].w=dd_width;
+      vehichle_down[3].x = vehichle_down[3].y = 0;vehichle_down[3].h = cng_height;vehichle_down[3].w=cng_width;
   return s;
 }
 void close()
 {
+  play_button.free();quit_button.free();logo.free();road.free();side_walk.free();side_walk_2.free();
+  gari_up.free();bus_up.free();dotola_bus_up.free();cng_up.free();
+  gari_down.free();bus_down.free();dotola_bus_down.free();cng_down.free();
   skeleton.free();
   SDL_DestroyWindow(main_window);
   SDL_DestroyRenderer(main_renderer);
@@ -369,6 +378,8 @@ int main(int argc,char *argv[])
     if(!loadMedia())printf("Error\n");
     else
     {
+      begin:
+
       SDL_Event e;
       int ident=0,f=0,p_f=6,q_f=6;
       int side_walk_y_1 = 0,side_walk_y_2=-1440;
@@ -378,14 +389,95 @@ int main(int argc,char *argv[])
       int mx,my;
       bool quit = false;
       bool menu=false;
-      bool marker_up[8];
-      int car_up = 0;
-      for(int w=0;w<8;w++)marker_up[w]=0;
-      int ypos_up[8];
-      for(int w=0;w<8;w++)ypos_up[w]=920;
+      bool marker_up[4][8];
+      bool marker_down[4][8];
+      int l;
+      int car_up = 0,car_down=0;
+      for(int q=0;q<4;q++)
+      {
+        for(int w=0;w<8;w++)
+        {
+          marker_up[q][w]=0;
+          marker_down[q][w]=0;
+        }
+      }
+      int ypos_up[8],ypos_down[8];
+      for(int w=0;w<8;w++)
+      {
+        ypos_up[w]=920;
+        ypos_down[w] = -200;
+      }
 
       while(!quit)
       {
+        if(menu)
+        {
+            srand(time(NULL));
+           if(car_up >= 8)car_up = 0;
+           if(car_down >= 8)car_down = 0;
+           if(clock_release.getTicks()%1000 == 0 && rand()%15<10)
+           {
+             l = rand()%4;
+             if(!marker_up[0][car_up+1]&&!marker_up[1][car_up+1]&&!marker_up[2][car_up+1]&&!marker_up[3][car_up+1])marker_up[l][car_up++]=1;
+
+           }
+           if(clock_release.getTicks()%1000 == 0 && rand()%15<10)
+           {
+             l = rand()%4;
+              if(!marker_down[0][car_down+1]&&!marker_down[1][car_down+1]&&!marker_down[2][car_down+1]&&!marker_down[3][car_down+1])marker_down[l][car_down++]=1;
+           }
+           for(int w=0;w<8;w++)
+           {
+             if(is_colliding(character_x,character_y,450,ypos_up[w]) || is_colliding(character_x,character_y,750,ypos_down[w]))
+             {
+               menu = false;
+               goto begin;
+             }
+           }
+           if(clock_move.getTicks()%1200 == 0)
+           {
+             for(int w=0;w<8;w++)
+             {
+               if(marker_up[0][w]||marker_up[1][w]||marker_up[2][w]||marker_up[3][w])
+               {
+                 ypos_up[w]-=1;
+               }
+               if(marker_down[0][w]||marker_down[1][w]||marker_down[2][w]||marker_down[3][w])
+               {
+                 ypos_down[w]+=1;
+               }
+             }
+             SDL_Delay(1);
+             clock_move.pause();
+           }
+
+           //SDL_Delay(1);
+           for(int w=0;w<8;w++)
+           {
+             if(marker_up[0][w]||marker_up[1][w]||marker_up[2][w]||marker_up[3][w])
+             {
+               if(character_y-ypos_up[w] > 720)
+               {
+                 marker_up[0][w]=0;
+                 marker_up[1][w]=0;
+                 marker_up[2][w]=0;
+                 marker_up[3][w]=0;
+                 ypos_up[w]=920;
+               }
+             }
+             if(marker_down[0][w] || marker_down[1][w] || marker_down[2][w] || marker_down[3][w])
+             {
+               if(ypos_down[w] - character_y > 720)
+               {
+                 marker_down[0][w]=0;
+                 marker_down[1][w]=0;
+                 marker_down[2][w]=0;
+                 marker_down[3][w]=0;
+                 ypos_down[w]=-200;
+               }
+             }
+           }
+        }
         const Uint8 *state = SDL_GetKeyboardState(NULL);
         while(SDL_PollEvent(&e))
         {
@@ -393,6 +485,7 @@ int main(int argc,char *argv[])
           {
             if(menu)//if we're playing the game, then these conditions apply
             {
+
               if(state[SDL_SCANCODE_UP])
               {
                 ident=0;
@@ -452,13 +545,13 @@ int main(int argc,char *argv[])
           if(e.type == SDL_MOUSEBUTTONDOWN)
           {
             SDL_GetMouseState(&mx,&my);
-            if(mx >= play_button_x && mx <= play_button_x+ button_width && my >= play_button_y && my <= play_button_y + button_height)
+            if(hover1)
             {
               clock_release.start();
               clock_move.start();
               menu = true;
             }
-            else if(mx >= quit_button_x && mx <= quit_button_x + button_width && my >= quit_button_y && my <= quit_button_y + button_height)
+            else if(hover2)
             {
               quit = true;
             }
@@ -469,46 +562,12 @@ int main(int argc,char *argv[])
           }
 
         }
+        clock_move.start();
         if(menu)
         {
           //If we start playing the game, this will show
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-  				SDL_RenderClear( main_renderer );
-          srand(time(NULL));
-           if(car_up >= 8)car_up = 0;
-           if(clock_release.getTicks()%1200 == 0 && rand()%15<10)
-           {
-             marker_up[car_up++]=1;
-           }
-           for(int w=0;w<8;w++)
-           {
-             if(is_colliding(character_x,character_y,450,ypos_up[w]))
-             {
-               menu = false;
-             }
-           }
-           if(clock_move.getTicks()%25==0 || clock_move.getTicks()%25 ==  1)
-           {
-             for(int w=0;w<8;w++)
-             {
-               if(marker_up[w])
-               {
-                 ypos_up[w]-=1;
-               }
-             }
-           }
-           //SDL_Delay(1);
-           for(int w=0;w<8;w++)
-           {
-             if(marker_up[w]==1)
-             {
-               if(character_y-ypos_up[w] > 720)
-               {
-                 marker_up[w]=0;
-                 ypos_up[w]=920;
-               }
-             }
-           }
+          SDL_RenderClear( main_renderer );
           if(road_y_1 >= 1440)road_y_1=-1440;
           if(road_y_2 >= 1440)road_y_2 = -1440;
           if(side_walk_y_1 >= 1440)side_walk_y_1=-1440;
@@ -531,14 +590,24 @@ int main(int argc,char *argv[])
           else if(ident == 3)skeleton.render(character_x,character_y,going_right+f);
           for(int w=0;w<8;w++)
           {
-            if(marker_up[w]== 1)bahon.render(450,ypos_up[w],&vehichle_up[w]);
+            if(marker_up[0][w]== 1)gari_up.render(450,ypos_up[w],&vehichle_up[0]);
+            else if(marker_up[1][w]==1)bus_up.render(450,ypos_up[w],&vehichle_up[1]);
+            else if(marker_up[2][w]==1)dotola_bus_up.render(450,ypos_up[w],&vehichle_up[2]);
+            else if(marker_up[3][w]==1)cng_up.render(450,ypos_up[w],&vehichle_up[3]);
+          }
+          for(int w=0;w<8;w++)
+          {
+            if(marker_down[0][w]== 1)gari_down.render(750,ypos_down[w],&vehichle_down[0]);
+            else if(marker_down[1][w]==1)bus_down.render(750,ypos_down[w],&vehichle_down[1]);
+            else if(marker_down[2][w]==1)dotola_bus_down.render(750,ypos_down[w],&vehichle_down[2]);
+            else if(marker_down[3][w]==1)cng_down.render(750,ypos_down[w],&vehichle_down[3]);
           }
           SDL_RenderPresent(main_renderer);
         }
         else
         {
           SDL_GetMouseState(&mx,&my);//current mouce coordinates
-          if(mx >= play_button_x && mx <= play_button_x+ button_width && my >= play_button_y && my <= play_button_y + button_height)
+          if(hover1)
           {
             SDL_Delay(50);
             p_f--;//if we hover over play button then run frames for play animation
@@ -546,7 +615,7 @@ int main(int argc,char *argv[])
             q_f++;
             if(q_f >= 6)q_f = 6;
           }
-          else if(mx >= quit_button_x && mx <= quit_button_x + button_width && my >= quit_button_y && my <= quit_button_y + button_height)
+          else if(hover2)
           {
             SDL_Delay(50);
             q_f--;//if we hover over quit button then run frames for quit animation
