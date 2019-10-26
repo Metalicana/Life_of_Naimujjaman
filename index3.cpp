@@ -8,14 +8,16 @@
 #define ekhon e.key.keysym.sym
 #define hover1 mx >= play_button_x && mx <= play_button_x+ button_width && my >= play_button_y && my <= play_button_y + button_height
 #define hover2 mx >= quit_button_x && mx <= quit_button_x + button_width && my >= quit_button_y && my <= quit_button_y + button_height
+#define hover3 mx >= hof_button_x && mx <= hof_button_x + button_width && my >= hof_button_y && my <= hof_button_y + button_height
 const int SW = 1280;
 const int SH = 720;
 const int walking = 9;
 const int button_animation = 7;
 const int button_height = 119;
 const int button_width = 323;
-const int play_button_x =450,play_button_y = 400;
-const int quit_button_x = 450,quit_button_y = 500;
+const int play_button_x =450,play_button_y = 350;
+const int quit_button_x = 450,quit_button_y = 450;
+const int hof_button_x = 450,hof_button_y = 550;
 const int fps = 8;
 const int car_height = 200;
 const int car_width = 90;
@@ -31,6 +33,7 @@ SDL_Rect going_left[walking];
 SDL_Rect going_right[walking];
 SDL_Rect play_button_array[button_animation];
 SDL_Rect quit_button_array[button_animation];
+SDL_Rect hof_button_array[button_animation];
 SDL_Rect vehichle_up[4];
 SDL_Rect vehichle_down[4];
 SDL_Rect logo_rect;
@@ -72,7 +75,7 @@ private:
   bool mPaused,mStarted;
 };
 
-texture_jinish skeleton,play_button,quit_button,logo,road,side_walk,side_walk_2;//textures
+texture_jinish skeleton,play_button,quit_button,hof_button,logo,road,side_walk,side_walk_2;//textures
 texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
 texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
 texture_jinish chips,frooto,coin;
@@ -275,6 +278,7 @@ bool loadMedia()
   s = s & road.loadFromFile("road.png");
   s = s & play_button.loadFromFile("play_btn_sprite.png");
   s = s & quit_button.loadFromFile("quit_btn_sprite.png");
+  s = s & hof_button.loadFromFile("hof_btn_sprite.png");
   s = s & side_walk.loadFromFile("sidewalk_left.png");
   s = s & side_walk_2.loadFromFile("sidewalk_right.png");
   s = s & gari_up.loadFromFile("car1.png");
@@ -299,7 +303,7 @@ bool loadMedia()
         {
           going_up[w].x = hx;
           going_up[w].y = hy;
-          going_up[w].h=hh;
+          going_up[w].h = hh;
           going_up[w].w = ww;
           hx += inter;
         }
@@ -309,7 +313,7 @@ bool loadMedia()
         {
           going_left[w].x = hx;
           going_left[w].y = hy;
-          going_left[w].h=hh;
+          going_left[w].h = hh;
           going_left[w].w = ww;
           hx += inter;
         }
@@ -319,7 +323,7 @@ bool loadMedia()
         {
           going_down[w].x = hx;
           going_down[w].y = hy;
-          going_down[w].h=hh;
+          going_down[w].h = hh;
           going_down[w].w = ww;
           hx += inter;
         }
@@ -329,7 +333,7 @@ bool loadMedia()
         {
           going_right[w].x = hx;
           going_right[w].y = hy;
-          going_right[w].h=hh;
+          going_right[w].h = hh;
           going_right[w].w = ww;
           hx += inter;
         }
@@ -338,7 +342,7 @@ bool loadMedia()
         {
           play_button_array[w].x = hx;
           play_button_array[w].y = hy;
-          play_button_array[w].h=hh;
+          play_button_array[w].h = hh;
           play_button_array[w].w = ww;
           hx += inter;
         }
@@ -347,8 +351,17 @@ bool loadMedia()
         {
           quit_button_array[w].x = hx;
           quit_button_array[w].y = hy;
-          quit_button_array[w].h=hh;
+          quit_button_array[w].h = hh;
           quit_button_array[w].w = ww;
+          hx += inter;
+        }
+        hx = 0,hy=0,inter=363,hh=119,ww=360;
+        for(int w=0;w<button_animation;w++)
+        {
+          hof_button_array[w].x = hx;
+          hof_button_array[w].y = hy;
+          hof_button_array[w].h = hh;
+          hof_button_array[w].w = ww;
           hx += inter;
         }
 
@@ -365,7 +378,7 @@ bool loadMedia()
 }
 void close()
 {
-  play_button.free();quit_button.free();logo.free();road.free();side_walk.free();side_walk_2.free();
+  play_button.free();quit_button.free();hof_button.free();logo.free();road.free();side_walk.free();side_walk_2.free();
   gari_up.free();bus_up.free();dotola_bus_up.free();cng_up.free();
   gari_down.free();bus_down.free();dotola_bus_down.free();cng_down.free();
   skeleton.free();
@@ -387,7 +400,7 @@ int main(int argc,char *argv[])
       begin:
 
       SDL_Event e;
-      int ident=0,f=0,p_f=6,q_f=6;
+      int ident=0,f=0,p_f=6,q_f=6,h_f=6;
       int side_walk_y_1 = 0,side_walk_y_2=-1440;
       int side_walk_y_3 = 0,side_walk_y_4 = -1440;
       int character_x = 15,character_y=600;
@@ -494,7 +507,7 @@ int main(int argc,char *argv[])
 
          }
         // printf("%d %d\n",character_x,character_y);
-         if(rand()%10 < 8 && snacks.getTicks()%1000 <= 20 && e.type == SDL_KEYDOWN)
+         if(rand()%10 < 8 && snacks.getTicks()%1000 <= 20 && e.type == SDL_KEYDOWN && character_y <= 360)
          {
            srand(time(NULL));
            l = rand()%2;
@@ -808,7 +821,9 @@ int main(int argc,char *argv[])
             p_f--;//if we hover over play button then run frames for play animation
             if(p_f< 0)p_f = 0;
             q_f++;
+            h_f++;
             if(q_f >= 6)q_f = 6;
+            if(h_f >= 6)h_f = 6;
           }
           else if(hover2)
           {
@@ -816,22 +831,37 @@ int main(int argc,char *argv[])
             q_f--;//if we hover over quit button then run frames for quit animation
             if(q_f < 0)q_f = 0;
             p_f++;
+            h_f++;
             if(p_f >= 6)p_f=6;
+            if(h_f >= 6)h_f=6;
+          }
+          else if(hover3)
+          {
+            SDL_Delay(50);
+            h_f--;//if we hover over quit button then run frames for quit animation
+            if(h_f < 0)h_f = 0;
+            p_f++;
+            q_f++;
+            if(p_f >= 6)p_f=6;
+            if(q_f >= 6)q_f=6;
           }
           else
           {
             p_f++;//we want to increment both frames to the last to bring animation of button to ground state
             q_f++;
+            h_f++;
             SDL_Delay(50);
             if(p_f>= 6)p_f = 6;
             if(q_f >= 6)q_f = 6;
+            if(h_f >= 6)h_f=6;
           }
           //This is the menu windown
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
           SDL_RenderClear( main_renderer );
           quit_button.render(quit_button_x,quit_button_y,quit_button_array+q_f);//quit button render
           play_button.render(play_button_x,play_button_y,play_button_array+p_f);//play button render
-          logo.render(450,150,&logo_rect);//logo render
+          hof_button.render(hof_button_x,hof_button_y,hof_button_array+h_f);
+          logo.render(470,100,&logo_rect);//logo render
           SDL_RenderPresent(main_renderer);
         }
       }
