@@ -401,7 +401,7 @@ int main(int argc,char *argv[])
       int l;
       int snack;
       int car_up = 0,car_down=0;
-      int stamina = 1000;
+      int stamina = 1280;
       for(int w=0;w<16;w++)
       {
         marker_snacks[0][w] = marker_snacks[1][w]=0;
@@ -494,7 +494,7 @@ int main(int argc,char *argv[])
 
          }
         // printf("%d %d\n",character_x,character_y);
-         if(rand()%10 < 8 && snacks.getTicks()%1000 <= 20)
+         if(rand()%10 < 8 && snacks.getTicks()%1000 <= 20 && e.type == SDL_KEYDOWN)
          {
            srand(time(NULL));
            l = rand()%2;
@@ -606,6 +606,9 @@ int main(int argc,char *argv[])
              if(is_colliding(character_x,character_y,xpos_snack[w],ypos_snack[w],chips_rect.h,chips_rect.w))
              {
                stamina+=100;
+               if (stamina > 1280) {
+                 stamina = 1280;
+               }
                xpos_snack[w]=0;
                ypos_snack[w]=15000;
 
@@ -618,6 +621,9 @@ int main(int argc,char *argv[])
                xpos_snack[w]=0;
                ypos_snack[w]=15000;
                stamina+=100;
+               if (stamina > 1280) {
+                 stamina = 1280;
+               }
              }
            }
          }
