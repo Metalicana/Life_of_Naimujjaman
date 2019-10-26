@@ -16,8 +16,8 @@ const int button_animation = 7;
 const int button_height = 119;
 const int button_width = 323;
 const int play_button_x =450,play_button_y = 350;
-const int quit_button_x = 450,quit_button_y = 450;
-const int hof_button_x = 450,hof_button_y = 550;
+const int quit_button_x = 450,quit_button_y = 550;
+const int hof_button_x = 450,hof_button_y = 450;
 const int fps = 8;
 const int car_height = 200;
 const int car_width = 90;
@@ -407,7 +407,7 @@ int main(int argc,char *argv[])
       int road_x = 340,road_y_1 = 0,road_y_2=-1440;
       int mx,my;
       bool quit = false;
-      bool menu=false;
+      bool in_game=false;
       bool marker_up[4][8];
       bool marker_down[4][8];
       bool marker_snacks[2][16];
@@ -452,7 +452,7 @@ int main(int argc,char *argv[])
                 clock_release.start();
                 clock_move.start();
                 snacks.start();
-                menu = true;
+                in_game = true;
               }
               else if(hover2)
               {
@@ -464,7 +464,7 @@ int main(int argc,char *argv[])
               quit = true;
             }
         }
-        if(menu)
+        if(in_game)
         {
           //If we start playing the game, this will show
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
@@ -507,7 +507,7 @@ int main(int argc,char *argv[])
 
          }
         // printf("%d %d\n",character_x,character_y);
-         if(rand()%10 < 8 && snacks.getTicks()%1000 <= 20 && e.type == SDL_KEYDOWN && character_y <= 360)
+         if(rand()%10 < 8 && snacks.getTicks()%1000 <= 20 && character_y <= 360 && state[SDL_SCANCODE_UP])
          {
            srand(time(NULL));
            l = rand()%2;
@@ -642,7 +642,7 @@ int main(int argc,char *argv[])
          }
          if(stamina<0)
          {
-           menu = false;
+           in_game = false;
            goto begin;
          }
          if(1)
