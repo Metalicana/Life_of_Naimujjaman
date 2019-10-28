@@ -1,9 +1,12 @@
-#include <bits/stdc++.h>
+#include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <map>
+#include <algorithm>
+#include <math.h>
 #include <string>
+#include <vector>
 #include <time.h>
 #include <stdlib.h>
 #define ekhon e.key.keysym.sym
@@ -263,6 +266,38 @@ void padded_itoa(int a, char arr[])
 
 }
 
+void updatescore (int tempscore)
+{
+  unsigned int i = 0, j = 0;
+
+  FILE *readscore = fopen("savedata/scores.sav", "r");
+
+  char updatescorename_array[totalscorenum + 1][17] = {0};
+  char updatescore_array[totalscorenum + 1][10] = {0};
+  int updatescore_int_array[totalscorenum + 1] = {0};
+  updatescore_int_array[totalscorenum] = tempscore;
+
+  while (i < totalscorenum) {
+    fscanf(readscore, "%s %s", updatescorename_array[i], updatescore_array[i]);
+    updatescore_int_array[i] = atoi(updatescore_array[i]);
+    i++;
+  }
+
+  fclose(readscore);
+
+  std::sort(updatescore_int_array, (updatescore_int_array + totalscorenum + 1), std::greater<int>());
+
+  FILE *edited_scoreboard = fopen("savedata/scores.sav", "w");
+
+  while (j < totalscorenum) {
+    fprintf(edited_scoreboard, "%s\n%08d\n", updatescorename_array[j], updatescore_int_array[j]);
+    j++;
+  }
+
+  fclose(edited_scoreboard);
+
+}
+
 bool init()
 {
   bool s = true;
@@ -322,17 +357,19 @@ bool loadscores()
   FILE *scoreboard = fopen("savedata/scores.sav", "r");
 
   char scorename_array[totalscorenum + 1][17] = {0};
-  char score_int_array[totalscorenum + 1][10] = {0};
+  char score_array[totalscorenum + 1][10] = {0};
 
   while (i < totalscorenum) {
-    fscanf(scoreboard, "%s %s", scorename_array[i], score_int_array[i]);
+    fscanf(scoreboard, "%s %s", scorename_array[i], score_array[i]);
     //printf("scorename scanned: %s\n", scorename_array[i]);
     i++;
   }
 
+  fclose(scoreboard);
+
   for (unsigned int j = 0; j < totalscorenum; j++) {
     s = s & scorename[j].RasteriseText(scorename_array[j]);
-    s = s & score[j].RasteriseText(score_int_array[j]);
+    s = s & score[j].RasteriseText(score_array[j]);
   }
 
   for (unsigned int score_rect_initialiser = 0; score_rect_initialiser < totalscorenum; score_rect_initialiser++) {
@@ -482,6 +519,10 @@ void close()
   gari_up.free();bus_up.free();dotola_bus_up.free();cng_up.free();
   gari_down.free();bus_down.free();dotola_bus_down.free();cng_down.free();
   skeleton.free();
+  for (unsigned int scorequit_idx = 0; scorequit_idx < totalscorenum; scorequit_idx++) {
+    score[scorequit_idx].free();
+    scorename[scorequit_idx].free();
+  }
   SDL_DestroyWindow(main_window);
   SDL_DestroyRenderer(main_renderer);
   main_window = NULL;
@@ -518,11 +559,11 @@ int main(int argc,char *argv[])
       bool marker_up[4][8];
       bool marker_down[4][8];
       bool marker_snacks[2][16];
+      bool scores_open = false;
       int l;
       int snack;
       int car_up = 0,car_down=0;
       int stamina = 1280;
-      loadscores();
       for(int w=0;w<16;w++)
       {
         marker_snacks[0][w] = marker_snacks[1][w]=0;
@@ -755,6 +796,7 @@ int main(int argc,char *argv[])
          if(stamina<0)
          {
            in_game = false;
+           updatescore(tempscore);
            goto begin;
          }
          if(1)
@@ -817,9 +859,9 @@ int main(int argc,char *argv[])
           side_walk.render(road_x - 170,side_walk_y_2,&side_walk_rect);
           side_walk_2.render(road_x+600,side_walk_y_3,&side_walk_rect_2);
           side_walk_2.render(road_x+600,side_walk_y_4,&side_walk_rect_2);
-          //currentscore.RasteriseText(tempscore_string);
-          //currentscore_rect.w = currentscore.getW();
-          //currentscore.render(900, 100, &currentscore_rect);
+          currentscore.RasteriseText(tempscore_string);
+          currentscore_rect.w = currentscore.getW();
+          currentscore.render(900, 100, &currentscore_rect);
           if(character_x < 0)character_x = 0;
           if(character_x > 1280)character_x = 1280;
           if(character_y < 0)character_y = 0;
@@ -948,10 +990,17 @@ int main(int argc,char *argv[])
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
           SDL_RenderClear( main_renderer );
 
-          /*if (!loadscores())
+          if (!scores_open)
           {
-            printf("Error loading score!\n");
-          }*/
+            if (!loadscores())
+            {
+              printf("Error loading score!\n");
+            }
+            else
+            {
+              scores_open = true;
+            }
+          }
 
           int score_render_x = 900, score_render_initial_y = 100;
           int scorename_render_x = 100, scorename_render_initial_y = 100;
