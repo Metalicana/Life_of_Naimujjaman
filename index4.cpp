@@ -12,7 +12,7 @@
 #define hover3 mx >= hof_button_x && mx <= hof_button_x + button_width && my >= hof_button_y && my <= hof_button_y + button_height
 const int SW = 1280;
 const int SH = 720;
-const unsigned int totalscorenum = 11;
+const unsigned int totalscorenum = 10;
 const int walking = 9;
 const int button_animation = 7;
 const int button_height = 119;
@@ -43,7 +43,8 @@ SDL_Rect logo_rect;
 SDL_Rect road_rect;
 SDL_Rect side_walk_rect,side_walk_rect_2;
 SDL_Rect chips_rect,frooto_rect;
-SDL_Rect text_rect[10];
+SDL_Rect scorename_rect[totalscorenum];
+SDL_Rect score_rect[totalscorenum];
 class texture_jinish
 {
   public:
@@ -84,7 +85,7 @@ texture_jinish skeleton,play_button,quit_button,hof_button,button_shadow,logo,ro
 texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
 texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
 texture_jinish chips,frooto,coin;
-texture_jinish score1,score2,score3,score4,score5,score6,score7,score8,score9,score10;
+texture_jinish scorename[10],score[10];
 timer clock_release,clock_move,snacks;
 bool init();//Initialization
 bool loadMedia();//loads media
@@ -136,8 +137,7 @@ bool texture_jinish::RasteriseText(std::string text)
     if(newTexture == NULL)printf( "Unable to create texture from %s! SDL Error: %s\n", text.c_str(), SDL_GetError() );
     else
     {
-      mWidth = 250;
-      mHeight = 50;
+      SDL_QueryTexture(newTexture, NULL, NULL, &mWidth, &mHeight);
     }
     SDL_FreeSurface(loadedSurface);
   }
@@ -300,23 +300,19 @@ bool loadscores() {
 
   FILE *scoreboard = fopen("savedata/scores.sav", "r");
 
-  char score[totalscorenum][10] = {0};
+  char scorename_array[totalscorenum + 1][17] = {0};
+  char score_int_array[totalscorenum + 1][10] = {0};
 
-  while (i < totalscorenum - 1) {
-    fscanf(scoreboard, "%s", score[i]);
+  while (i < totalscorenum) {
+    fscanf(scoreboard, "%s %s", scorename_array[i], score_int_array[i]);
+    //printf("scorename scanned: %s\n", scorename_array[i]);
     i++;
   }
 
-  s = s & score1.RasteriseText(score[0]);
-  s = s & score2.RasteriseText(score[1]);
-  s = s & score3.RasteriseText(score[2]);
-  s = s & score4.RasteriseText(score[3]);
-  s = s & score5.RasteriseText(score[4]);
-  s = s & score6.RasteriseText(score[5]);
-  s = s & score7.RasteriseText(score[6]);
-  s = s & score8.RasteriseText(score[7]);
-  s = s & score9.RasteriseText(score[8]);
-  s = s & score10.RasteriseText(score[9]);
+  for (unsigned int j = 0; j < totalscorenum; j++) {
+    s = s & scorename[j].RasteriseText(scorename_array[j]);
+    s = s & score[j].RasteriseText(score_int_array[j]);
+  }
 
   return s;
 
@@ -369,12 +365,21 @@ bool loadMedia()
   side_walk_rect_2.x =0,side_walk_rect_2.y=0,side_walk_rect_2.h=1440,side_walk_rect_2.w=170;
   chips_rect.x = 0,chips_rect.y = 0,chips_rect.w =48,chips_rect.h=60;
   frooto_rect.x = 0,frooto_rect.y = 0,frooto_rect.w = 24,frooto_rect.h = 60;
-  for (int text_rect_initialiser = 0; text_rect_initialiser < 10; text_rect_initialiser++) {
-    text_rect[text_rect_initialiser].x = 0;
-    text_rect[text_rect_initialiser].y = 0;
-    text_rect[text_rect_initialiser].w = 250;
-    text_rect[text_rect_initialiser].h = 50;
+
+  for (unsigned int score_rect_initialiser = 0; score_rect_initialiser < totalscorenum; score_rect_initialiser++) {
+    score_rect[score_rect_initialiser].x = 0;
+    score_rect[score_rect_initialiser].y = 0;
+    score_rect[score_rect_initialiser].w = 250;
+    score_rect[score_rect_initialiser].h = 50;
   }
+
+  for (unsigned int scorename_rect_initialiser = 0; scorename_rect_initialiser < totalscorenum; scorename_rect_initialiser++) {
+    scorename_rect[scorename_rect_initialiser].x = 0;
+    scorename_rect[scorename_rect_initialiser].y = 0;
+    scorename_rect[scorename_rect_initialiser].w = 500;
+    scorename_rect[scorename_rect_initialiser].h = 50;
+  }
+
         int hx = 0,hy = 0,inter = 90;
         int hh=110,ww=90;
         for(int w=0;w<walking;w++)
@@ -467,6 +472,7 @@ int main(int argc,char *argv[])
       int character_x = 15,character_y=600;
       int road_x = 340,road_y_1 = 0,road_y_2=-1440;
       int mx,my;
+      int tempscore = 0;
       bool quit = false;
       bool in_game=false;
       bool in_scoreboard = false;
@@ -800,9 +806,22 @@ int main(int argc,char *argv[])
             else if(marker_down[3][w]==1)cng_down.render(750,ypos_down[w],&vehichle_down[3]);
           }
           SDL_Rect stam = {0,0,stamina,15};
-          SDL_SetRenderDrawColor( main_renderer, 0xFF, 0x12, 0x21, 0x88 );
-          SDL_RenderFillRect( main_renderer, &stam );
-          SDL_RenderPresent(main_renderer);
+          if (stamina >= 800) {
+            SDL_SetRenderDrawColor( main_renderer, 0x85, 0xDD, 0x88, 0xFF ); //Colour code #85dd88
+            SDL_RenderFillRect( main_renderer, &stam );
+            SDL_RenderPresent(main_renderer);
+          }
+          else if (stamina < 800 && stamina >= 400) {
+            SDL_SetRenderDrawColor( main_renderer, 0xDD, 0xB5, 0x85, 0xFF ); //Colour code #ddb585
+            SDL_RenderFillRect( main_renderer, &stam );
+            SDL_RenderPresent(main_renderer);
+          }
+          else {
+            SDL_SetRenderDrawColor( main_renderer, 0xDD, 0x85, 0x85, 0xFF ); //Colour code #dd8585
+            SDL_RenderFillRect( main_renderer, &stam );
+            SDL_RenderPresent(main_renderer);
+          }
+
           if(state[SDL_SCANCODE_UP] ||state[SDL_SCANCODE_LEFT]||state[SDL_SCANCODE_RIGHT]||state[SDL_SCANCODE_DOWN])//if we're playing the game, then these conditions apply
           {
             if(state[SDL_SCANCODE_UP] )
@@ -811,6 +830,8 @@ int main(int argc,char *argv[])
               ident=0;
               if(character_y <= 360)
               {
+                tempscore++;
+                //printf("%d\n", tempscore);
                 road_y_1+=fps;
                 road_y_2 +=fps;
                 side_walk_y_1 += fps;
@@ -889,16 +910,13 @@ int main(int argc,char *argv[])
             printf("Error loading score!\n");
           }*/
 
-            score1.render(100, 100, &text_rect[0]);
-            score2.render(100, 150, &text_rect[1]);
-            score3.render(100, 200, &text_rect[2]);
-            score4.render(100, 250, &text_rect[3]);
-            score5.render(100, 300, &text_rect[4]);
-            score6.render(100, 350, &text_rect[5]);
-            score7.render(100, 400, &text_rect[6]);
-            score8.render(100, 450, &text_rect[7]);
-            score9.render(100, 500, &text_rect[8]);
-            score10.render(100, 550, &text_rect[9]);
+            int score_render_x = 900, score_render_initial_y = 100;
+            int scorename_render_x = 100, scorename_render_initial_y = 100;
+
+            for (unsigned int score_render_idx = 0; score_render_idx < totalscorenum; score_render_idx++, scorename_render_initial_y += 50, score_render_initial_y += 50) {
+              scorename[score_render_idx].render(scorename_render_x, scorename_render_initial_y, &scorename_rect[score_render_idx]);
+              score[score_render_idx].render(score_render_x, score_render_initial_y, &score_rect[score_render_idx]);
+            }
 
           SDL_RenderPresent(main_renderer);
         }
