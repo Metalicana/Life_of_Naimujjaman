@@ -49,6 +49,7 @@ SDL_Rect chips_rect,frooto_rect;
 SDL_Rect scorename_rect[totalscorenum];
 SDL_Rect score_rect[totalscorenum];
 SDL_Rect currentscore_rect;
+TTF_Font *main_font;
 class texture_jinish
 {
   public:
@@ -129,7 +130,6 @@ bool texture_jinish::loadFromFile(std::string path)
 bool texture_jinish::RasteriseText(std::string text)
 {
   free();//free prexesting texture
-  TTF_Font *main_font = TTF_OpenFont("main_font.ttf", 48);
   SDL_Color Black = {0, 0, 0};
   SDL_Texture *newTexture = NULL;
   SDL_Surface *loadedSurface = TTF_RenderText_Blended(main_font, text.c_str(), Black);
@@ -426,6 +426,7 @@ bool loadMedia()
   s = s & cng_down.loadFromFile("cng2.png");
   s = s & chips.loadFromFile("chips.png");
   s = s & frooto.loadFromFile("frooto.png");
+  main_font = TTF_OpenFont("main_font.ttf", 48);
 
   play_button_rect.x = 0;play_button_rect.y = 0;play_button_rect.h = 119;play_button_rect.w = 363;
   quit_button_rect.x = 0;quit_button_rect.y = 0;quit_button_rect.h = 119;quit_button_rect.w = 363;
@@ -542,6 +543,7 @@ int main(int argc,char *argv[])
       begin:
 
       SDL_Event e;
+
       int ident=0,f=0,p_f=6,q_f=6,h_f=6;
       int side_walk_y_1 = 0,side_walk_y_2=-1440;
       int side_walk_y_3 = 0,side_walk_y_4 = -1440;
