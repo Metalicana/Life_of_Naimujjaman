@@ -18,7 +18,10 @@ const int SH = 720;
 const unsigned int totalscorenum = 10;
 const int walking = 9;
 const int button_animation = 7;
+const int coin_animation = 36;
 const int button_height = 119;
+const int coin_width = 32;
+const int coin_height = 32;
 const int button_width = 323;
 const int play_button_x =450,play_button_y = 350;
 const int quit_button_x = 450,quit_button_y = 550;
@@ -32,6 +35,8 @@ const int dd_height = 200;
 const int dd_width = 90;
 const int cng_height = 150;
 const int cng_width = 90;
+const int bike_height =120;
+const int bike_width = 50;
 SDL_Rect going_up[walking];
 SDL_Rect going_down[walking];
 SDL_Rect going_left[walking];
@@ -49,6 +54,8 @@ SDL_Rect chips_rect,frooto_rect;
 SDL_Rect scorename_rect[totalscorenum];
 SDL_Rect score_rect[totalscorenum];
 SDL_Rect currentscore_rect;
+SDL_Rect bike_up_rect,bike_down_rect;
+SDL_Rect coin_rect[coin_animation];
 TTF_Font *main_font;
 class texture_jinish
 {
@@ -91,6 +98,7 @@ texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
 texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
 texture_jinish chips,frooto,coin;
 texture_jinish scorename[10],score[10],currentscore;
+texture_jinish bike_up,bike_down;
 timer clock_release,clock_move,snacks;
 bool init();//Initialization
 bool loadMedia();//loads media
@@ -426,6 +434,9 @@ bool loadMedia()
   s = s & cng_down.loadFromFile("cng2.png");
   s = s & chips.loadFromFile("chips.png");
   s = s & frooto.loadFromFile("frooto.png");
+  s = s & bike_up.loadFromFile("bike1.png");
+  s = s & bike_down.loadFromFile("bike2.png");
+  s = s & coin.loadFromFile("coinsprites/coinspritesheet.png");
   main_font = TTF_OpenFont("main_font.ttf", 48);
 
   play_button_rect.x = 0;play_button_rect.y = 0;play_button_rect.h = 119;play_button_rect.w = 363;
@@ -502,6 +513,15 @@ bool loadMedia()
           button_shadow_array[w].w = ww;
           hx += inter;
         }
+        hx = 0,hy=0,inter=coin_width,hh=coin_height,ww=coin_width;
+        for(int w=0;w<coin_animation;w++)
+        {
+          coin_rect[w].x = hx;
+          coin_rect[w].y = hy;
+          coin_rect[w].h = coin_height;
+          coin_rect[w].w = coin_width;
+          hx += inter;
+        }
 
       vehichle_up[0].x = vehichle_up[0].y = 0;vehichle_up[0].h = car_height;vehichle_up[0].w=car_width;
       vehichle_up[1].x = vehichle_up[1].y = 0;vehichle_up[1].h = bus_height;vehichle_up[1].w=bus_width;
@@ -511,6 +531,9 @@ bool loadMedia()
       vehichle_down[1].x = vehichle_down[1].y = 0;vehichle_down[1].h = bus_height;vehichle_down[1].w=bus_width;
       vehichle_down[2].x = vehichle_down[2].y = 0;vehichle_down[2].h = dd_height;vehichle_down[2].w=dd_width;
       vehichle_down[3].x = vehichle_down[3].y = 0;vehichle_down[3].h = cng_height;vehichle_down[3].w=cng_width;
+      bike_up_rect.x = 0,bike_up_rect.y=0,bike_up_rect.h=bike_height,bike_up_rect.w=bike_width;
+      bike_down_rect.x = 0,bike_down_rect.y=0,bike_down_rect.h=bike_height,bike_down_rect.w = bike_width;
+
 
   return s;
 }
@@ -550,7 +573,9 @@ int main(int argc,char *argv[])
       int character_x = 15,character_y=600;
       int road_x = 340,road_y_1 = 0,road_y_2=-1440;
       int mx,my;
+      bool moto = false;
       int tempscore = 0;
+      int speed = 4;
       char tempscore_string[9] = {0};
       for (int tempscore_string_initialiser = 0; tempscore_string_initialiser < 8; tempscore_string_initialiser++) {
         tempscore_string[tempscore_string_initialiser] = 48;
@@ -561,11 +586,22 @@ int main(int argc,char *argv[])
       bool marker_up[4][8];
       bool marker_down[4][8];
       bool marker_snacks[2][16];
+      bool marker_coin[16];
       bool scores_open = false;
       int l;
       int snack;
       int car_up = 0,car_down=0;
       int stamina = 1280;
+      int stamina_blow = 100;
+      bool bike_up_stat = 0;
+      bool bike_down_stat = 0;
+      int ypos_bike_up = 920;
+      int ypos_bike_down = -200;
+      int xpos_bike=450;
+      for(int w=0;w<16;w++)
+      {
+        marker_coin[w]=0;
+      }
       for(int w=0;w<16;w++)
       {
         marker_snacks[0][w] = marker_snacks[1][w]=0;
@@ -578,6 +614,7 @@ int main(int argc,char *argv[])
           marker_down[q][w]=0;
         }
       }
+      int coins = 0;
       int ypos_up[8],ypos_down[8];
       for(int w=0;w<8;w++)
       {
@@ -586,10 +623,14 @@ int main(int argc,char *argv[])
       }
       int ypos_snack[16];
       int xpos_snack[16];
+      int ypos_coin[16];
+      int xpos_coin[16];
       for(int w=0;w<16;w++)
       {
         ypos_snack[w] = 720;
+        ypos_coin[w]=720;
       }
+      int c_f = 0;
       const Uint8 *state = SDL_GetKeyboardState(NULL);
       while(!quit)
       {
@@ -629,11 +670,46 @@ int main(int argc,char *argv[])
          if(car_up >= 8)car_up = 0;
          if(car_down >= 8)car_down = 0;
          if(snack >= 16)snack = 0;
-         /*if(snacks.getTicks()%1000 <= 20 && rand()%15 < 13)
+         if(coins >= 16)coins = 0;
+         if(clock_release.getTicks()%6000 < 15 && moto && !bike_up_stat && !bike_down_stat)
          {
-
-
-         }*/
+           if(rand()%2 == 0)
+           {
+             bike_up_stat = 1;
+             bike_down_stat = 0;
+             if(rand()%3 ==0)
+             {
+               xpos_bike = 180;
+             }
+             else if(rand()%3==1)
+             {
+              xpos_bike = 600;
+             }
+             else
+             {
+              xpos_bike  = 1000;
+             }
+           }
+           else
+           {
+             bike_up_stat = 0;
+             bike_down_stat = 1;
+             if(rand()%3 ==0)
+             {
+               xpos_bike = 200;
+             }
+             else if(rand()%3==1)
+             {
+              xpos_bike = 600;
+             }
+             else
+             {
+              xpos_bike  = 1000;
+             }
+           }
+         }
+         if(c_f >= 16)c_f = 0;
+         c_f++;
          if(clock_release.getTicks()%1000 <= 20 && rand()%15<10)
          {
            srand(time(NULL));
@@ -671,6 +747,12 @@ int main(int argc,char *argv[])
              marker_snacks[l][snack++]=1;
              ypos_snack[snack-1] = character_y - 400 - rand()%300;
              xpos_snack[snack-1]  = 300 +  rand()%600;
+           }
+           if(!marker_coin[coins])
+           {
+             marker_coin[coins] = 1;
+             ypos_coin[coins] = character_y - 200 - rand()%450;
+             xpos_coin[coins] = 200 + rand()%700;
            }
          }
          srand(time(NULL));
@@ -762,9 +844,25 @@ int main(int argc,char *argv[])
 
            if(is_colliding(character_x,character_y,450,ypos_up[w],h1,w1) || is_colliding(character_x,character_y,750,ypos_down[w],h2,w2))
            {
-             character_x=150;
-             stamina-=100;
+             character_x=100;
+             stamina-=stamina_blow;
              //SDL_Delay(50);
+           }
+         }
+         if(bike_up_stat)
+         {
+           if(is_colliding(character_x,character_y,xpos_bike,ypos_bike_up,bike_height,bike_width))
+           {
+             character_x = 100;
+             stamina -= 3*stamina_blow;
+           }
+         }
+         else if(bike_down_stat)
+         {
+           if(is_colliding(character_x,character_y,xpos_bike,ypos_bike_down,bike_height,bike_width))
+           {
+             character_x = 100;
+             stamina -= 3*stamina_blow;
            }
          }
          for(int w=0;w<16;w++)
@@ -794,12 +892,26 @@ int main(int argc,char *argv[])
                }
              }
            }
+           else if(marker_coin[w])
+           {
+             if(is_colliding(character_x,character_y,xpos_coin[w],ypos_coin[w],coin_height,coin_width))
+             {
+               ypos_coin[w]=15000;
+               tempscore += 100;
+             }
+           }
          }
          if(stamina<0)
          {
            in_game = false;
            updatescore(tempscore);
            goto begin;
+         }
+         stamina_blow = 100 + tempscore/1000;
+         speed  = tempscore/8000 + 3;
+         if(tempscore > 100)
+         {
+           moto = 1;
          }
          if(1)
          {
@@ -808,13 +920,31 @@ int main(int argc,char *argv[])
              if(marker_up[0][w]||marker_up[1][w]||marker_up[2][w]||marker_up[3][w])
              {
                //printf("%d",state[SDL_SCANCODE_UP]);
-               ypos_up[w]-=(fps );//- fps*state[SDL_SCANCODE_UP]);
+               ypos_up[w]-=(fps*2 + (speed-2)*state[SDL_SCANCODE_UP] );//- fps*state[SDL_SCANCODE_UP]);
              }
              if(marker_down[0][w]||marker_down[1][w]||marker_down[2][w]||marker_down[3][w])
              {
-               ypos_down[w]+=(fps + 4*state[SDL_SCANCODE_UP]);
+               ypos_down[w]+=(fps*2 + (speed+1)*state[SDL_SCANCODE_UP]);
              }
            }
+           if(bike_up_stat)ypos_bike_up -= fps*2;
+           if(bike_down_stat)ypos_bike_down += fps*2;
+         }
+         if(bike_up_stat)
+         {
+           if(character_y - ypos_bike_up > 720)
+           {
+             ypos_bike_up = 920;
+             bike_up_stat = 0;
+           }
+         }
+         if(bike_down_stat)
+         {
+          if(ypos_bike_down - character_y > 720)
+          {
+            ypos_bike_down = -200;
+            bike_down_stat = 0;
+          }
          }
          for(int w=0;w<16;w++)
          {
@@ -822,6 +952,10 @@ int main(int argc,char *argv[])
            {
              marker_snacks[0][w]=0;
              marker_snacks[1][w]=0;
+           }
+           if(ypos_coin[w] - character_y > 720)
+           {
+             marker_coin[w] = 0;
            }
          }
          for(int w=0;w<8;w++)
@@ -872,6 +1006,7 @@ int main(int argc,char *argv[])
           {
             if(marker_snacks[0][w])chips.render(xpos_snack[w],ypos_snack[w],&chips_rect);
             else if(marker_snacks[1][w])frooto.render(xpos_snack[w],ypos_snack[w],&frooto_rect);
+            if(marker_coin[w])coin.render(xpos_coin[w],ypos_coin[w],coin_rect+c_f);
           }
           if(ident == 0)skeleton.render(character_x,character_y,going_up+f);
           else if(ident == 1)skeleton.render(character_x,character_y,going_down+f);
@@ -891,6 +1026,8 @@ int main(int argc,char *argv[])
             else if(marker_down[2][w]==1)dotola_bus_down.render(750,ypos_down[w],&vehichle_down[2]);
             else if(marker_down[3][w]==1)cng_down.render(750,ypos_down[w],&vehichle_down[3]);
           }
+          if(bike_up_stat)bike_up.render(xpos_bike,ypos_bike_up,&bike_up_rect);
+          if(bike_down_stat)bike_down.render(xpos_bike,ypos_bike_down,&bike_down_rect);
           SDL_Rect stam = {0,0,stamina,15};
           if (stamina >= 800) {
             SDL_SetRenderDrawColor( main_renderer, 0x85, 0xDD, 0x88, 0xFF ); //Colour code #85dd88
@@ -928,6 +1065,7 @@ int main(int argc,char *argv[])
                 for(int w=0;w<16;w++)
                 {
                   if(marker_snacks[0][w] || marker_snacks[1][w])ypos_snack[w]+=fps;
+                  if(marker_coin[w])ypos_coin[w]+=fps;
                 }
               /*  for(int w=0;w<8;w++)
                 {
@@ -983,7 +1121,7 @@ int main(int argc,char *argv[])
             f++;
             if(f >= 9)f=0;
           }
-          SDL_Delay(15);
+          SDL_Delay(10);
 
 
         }
