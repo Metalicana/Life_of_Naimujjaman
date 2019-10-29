@@ -708,7 +708,7 @@ int main(int argc,char *argv[])
              }
            }
          }
-         if(c_f >= 16)c_f = 0;
+         if(c_f >= 36)c_f = 0;
          c_f++;
          if(clock_release.getTicks()%1000 <= 20 && rand()%15<10)
          {
