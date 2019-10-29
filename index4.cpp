@@ -9,6 +9,7 @@
 #include <vector>
 #include <time.h>
 #include <stdlib.h>
+#include <cstring>
 #define ekhon e.key.keysym.sym
 #define hover1 mx >= play_button_x && mx <= play_button_x+ button_width && my >= play_button_y && my <= play_button_y + button_height
 #define hover2 mx >= quit_button_x && mx <= quit_button_x + button_width && my >= quit_button_y && my <= quit_button_y + button_height
@@ -20,9 +21,9 @@ const int walking = 9;
 const int button_animation = 7;
 const int coin_animation = 36;
 const int button_height = 119;
+const int button_width = 323;
 const int coin_width = 32;
 const int coin_height = 32;
-const int button_width = 323;
 const int play_button_x =450,play_button_y = 350;
 const int quit_button_x = 450,quit_button_y = 550;
 const int hof_button_x = 450,hof_button_y = 450;
@@ -37,6 +38,8 @@ const int cng_height = 150;
 const int cng_width = 90;
 const int bike_height =120;
 const int bike_width = 50;
+bool in_scoresave = false;
+bool played_once = false;
 SDL_Rect going_up[walking];
 SDL_Rect going_down[walking];
 SDL_Rect going_left[walking];
@@ -47,6 +50,8 @@ SDL_Rect hof_button_rect;
 SDL_Rect button_shadow_array[button_animation];
 SDL_Rect vehichle_up[4];
 SDL_Rect vehichle_down[4];
+SDL_Rect bike_up_rect,bike_down_rect;
+SDL_Rect coin_rect[coin_animation];
 SDL_Rect logo_rect;
 SDL_Rect road_rect;
 SDL_Rect side_walk_rect,side_walk_rect_2;
@@ -54,9 +59,11 @@ SDL_Rect chips_rect,frooto_rect;
 SDL_Rect scorename_rect[totalscorenum];
 SDL_Rect score_rect[totalscorenum];
 SDL_Rect currentscore_rect;
-SDL_Rect bike_up_rect,bike_down_rect;
-SDL_Rect coin_rect[coin_animation];
+SDL_Rect scoresave_text_rect, scoresave_name_rect;
 TTF_Font *main_font;
+int tempscore = 0;
+char tempscore_string[9] = {0};
+std::string tempname = "";
 class texture_jinish
 {
   public:
@@ -97,7 +104,7 @@ texture_jinish skeleton,play_button,quit_button,hof_button,button_shadow,logo,ro
 texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
 texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
 texture_jinish chips,frooto,coin;
-texture_jinish scorename[10],score[10],currentscore;
+texture_jinish scorename[10],score[10],currentscore,scoresave_text,scoresave_name;
 texture_jinish bike_up,bike_down;
 timer clock_release,clock_move,snacks;
 bool init();//Initialization
@@ -140,6 +147,9 @@ bool texture_jinish::RasteriseText(std::string text)
   free();//free prexesting texture
   SDL_Color Black = {0, 0, 0};
   SDL_Texture *newTexture = NULL;
+  if (text == "") {
+    text = " ";
+  }
   SDL_Surface *loadedSurface = TTF_RenderText_Blended(main_font, text.c_str(), Black);
 
   if(loadedSurface == NULL)printf( "Unable to load font %s! SDL_TTF Error: %s\n", text.c_str(), TTF_GetError() );
@@ -274,13 +284,13 @@ void padded_itoa(int a, char arr[])
 
 }
 
-void updatescore (int tempscore)
+void updatescore (int tempscore, char tempname[])
 {
-  unsigned int i = 0, j = 0;
+  unsigned int i = 0, j = 0, k = 0;
 
   FILE *readscore = fopen("savedata/scores.sav", "r");
 
-  char updatescorename_array[totalscorenum + 1][17] = {0};
+  char updatescorename_array[totalscorenum + 1][11] = {0};
   char updatescore_array[totalscorenum + 1][10] = {0};
   int updatescore_int_array[totalscorenum + 1] = {0};
   updatescore_int_array[totalscorenum] = tempscore;
@@ -294,6 +304,13 @@ void updatescore (int tempscore)
   fclose(readscore);
 
   std::sort(updatescore_int_array, (updatescore_int_array + totalscorenum + 1), std::greater<int>());
+
+  for (k = (totalscorenum - 1); k >= 0; k--) {
+    if (tempscore == updatescore_int_array[k]) {
+      strcpy(updatescorename_array[k], tempname);
+      break;
+    }
+  }
 
   FILE *edited_scoreboard = fopen("savedata/scores.sav", "w");
 
@@ -364,7 +381,7 @@ bool loadscores()
 
   FILE *scoreboard = fopen("savedata/scores.sav", "r");
 
-  char scorename_array[totalscorenum + 1][17] = {0};
+  char scorename_array[totalscorenum + 1][11] = {0};
   char score_array[totalscorenum + 1][10] = {0};
 
   while (i < totalscorenum) {
@@ -391,7 +408,7 @@ bool loadscores()
     scorename_rect[scorename_rect_initialiser].x = 0;
     scorename_rect[scorename_rect_initialiser].y = 0;
     scorename_rect[scorename_rect_initialiser].w = scorename[scorename_rect_initialiser].getW();
-    scorename_rect[scorename_rect_initialiser].h = 50;
+    scorename_rect[scorename_rect_initialiser].h = scorename[scorename_rect_initialiser].getH();
   }
 
   return s;
@@ -449,20 +466,6 @@ bool loadMedia()
   chips_rect.x = 0,chips_rect.y = 0,chips_rect.w =48,chips_rect.h=60;
   frooto_rect.x = 0,frooto_rect.y = 0,frooto_rect.w = 24,frooto_rect.h = 60;
   currentscore_rect.x = 0,currentscore_rect.y = 0,currentscore_rect.w = 250,currentscore_rect.h = 50;
-
-  /*for (unsigned int score_rect_initialiser = 0; score_rect_initialiser < totalscorenum; score_rect_initialiser++) {
-    score_rect[score_rect_initialiser].x = 0;
-    score_rect[score_rect_initialiser].y = 0;
-    score_rect[score_rect_initialiser].w = 250;
-    score_rect[score_rect_initialiser].h = 50;
-  }
-
-  for (unsigned int scorename_rect_initialiser = 0; scorename_rect_initialiser < totalscorenum; scorename_rect_initialiser++) {
-    scorename_rect[scorename_rect_initialiser].x = 0;
-    scorename_rect[scorename_rect_initialiser].y = 0;
-    scorename_rect[scorename_rect_initialiser].w = scorename[scorename_rect_initialiser].getW();
-    scorename_rect[scorename_rect_initialiser].h = 50;
-  }*/
 
         int hx = 0,hy = 0,inter = 90;
         int hh=110,ww=90;
@@ -534,7 +537,6 @@ bool loadMedia()
       bike_up_rect.x = 0,bike_up_rect.y=0,bike_up_rect.h=bike_height,bike_up_rect.w=bike_width;
       bike_down_rect.x = 0,bike_down_rect.y=0,bike_down_rect.h=bike_height,bike_down_rect.w = bike_width;
 
-
   return s;
 }
 void close()
@@ -574,10 +576,9 @@ int main(int argc,char *argv[])
       int road_x = 340,road_y_1 = 0,road_y_2=-1440;
       int mx,my;
       bool moto = false;
-      int tempscore = 0;
       int speed = 4;
-      char tempscore_string[9] = {0};
-      for (int tempscore_string_initialiser = 0; tempscore_string_initialiser < 8; tempscore_string_initialiser++) {
+      for (int tempscore_string_initialiser = 0; tempscore_string_initialiser < 8; tempscore_string_initialiser++)
+      {
         tempscore_string[tempscore_string_initialiser] = 48;
       }
       bool quit = false;
@@ -588,6 +589,8 @@ int main(int argc,char *argv[])
       bool marker_snacks[2][16];
       bool marker_coin[16];
       bool scores_open = false;
+      bool rerender_text = false;
+      bool savenow = false;
       int l;
       int snack;
       int car_up = 0,car_down=0;
@@ -639,22 +642,46 @@ int main(int argc,char *argv[])
             if(e.type == SDL_MOUSEBUTTONDOWN)
             {
               SDL_GetMouseState(&mx,&my);
-              if((hover1) && !in_game && !in_scoreboard)
+              if((hover1) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 clock_release.start();
                 clock_move.start();
                 snacks.start();
                 in_game = true;
               }
-              else if((hover2) && !in_game && !in_scoreboard)
+              else if((hover2) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 quit = true;
               }
-              else if((hover3) && !in_game && !in_scoreboard)
+              else if((hover3) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 in_scoreboard = true;
               }
+
             }
+            else if(e.type == SDL_KEYDOWN)
+            {
+              if( e.key.keysym.sym == SDLK_BACKSPACE && tempname.length() > 0 && !in_game && in_scoresave)
+  						{
+  							//lop off character
+  							tempname.pop_back();
+  							rerender_text = true;
+  						}
+              else if(e.key.keysym.sym == SDLK_RETURN && tempname.length() > 0 && !in_game && in_scoresave)
+              {
+                savenow = true;
+              }
+            }
+
+            else if( e.type == SDL_TEXTINPUT )
+  					{
+  						if(tempname.length() <= 10 && !in_game && in_scoresave)
+  						{
+  							tempname += e.text.text;
+  							rerender_text = true;
+  						}
+  					}
+
             else if(e.type == SDL_QUIT)
             {
               quit = true;
@@ -904,7 +931,7 @@ int main(int argc,char *argv[])
          if(stamina<0)
          {
            in_game = false;
-           updatescore(tempscore);
+           in_scoresave = true;
            goto begin;
          }
          stamina_blow = 100 + tempscore/1000;
@@ -1151,6 +1178,53 @@ int main(int argc,char *argv[])
           }
 
           SDL_RenderPresent(main_renderer);
+        }
+        else if(in_scoresave)
+        {
+          SDL_StartTextInput();
+
+          scoresave_text.RasteriseText("Enter your name (Max 10 characters):");
+          scoresave_text_rect.x = 0;scoresave_text_rect.y = 0;scoresave_text_rect.w = scoresave_text.getW();scoresave_text_rect.h = scoresave_text.getH();
+
+          SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+          SDL_RenderClear( main_renderer );
+
+          if(rerender_text)
+  				{
+  					//Text is not empty
+  					if( tempname != "" )
+  					{
+  						//Render new text
+              scoresave_name.RasteriseText(tempname.c_str());
+              scoresave_name_rect.x = 0;scoresave_name_rect.y = 0;scoresave_name_rect.w = scoresave_name.getW();scoresave_name_rect.h = scoresave_name.getH();
+  					}
+  					//Text is empty
+  					else
+  					{
+  						//Render space texture
+  						scoresave_name.RasteriseText(" ");
+  					}
+  				}
+
+          scoresave_text.render(100, 200, &scoresave_text_rect);
+          scoresave_name.render(100, 275, &scoresave_name_rect);
+
+          SDL_RenderPresent(main_renderer);
+
+          if (savenow) {
+            savenow = false;
+            SDL_StopTextInput();
+            updatescore(tempscore, &tempname[0]);
+            tempscore = 0;
+            tempname = "";
+            scoresave_name.RasteriseText(tempname.c_str());
+            tempscore_string[9] = {0};
+            for (int tempscore_string_initialiser = 0; tempscore_string_initialiser < 8; tempscore_string_initialiser++) {
+              tempscore_string[tempscore_string_initialiser] = 48;
+            }
+            in_scoresave = false;
+          }
+
         }
         else
         {
