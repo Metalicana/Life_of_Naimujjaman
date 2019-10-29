@@ -296,7 +296,10 @@ void updatescore (int tempscore, char tempname[])
   updatescore_int_array[totalscorenum] = tempscore;
 
   while (i < totalscorenum) {
-    fscanf(readscore, "%s %s", updatescorename_array[i], updatescore_array[i]);
+    fgets(updatescorename_array[i], 12, readscore);
+    updatescorename_array[i][strcspn(updatescorename_array[i], "\n")] = 0;
+    fgets(updatescore_array[i], 10, readscore);
+    updatescore_array[i][strcspn(updatescore_array[i], "\n")] = 0;
     updatescore_int_array[i] = atoi(updatescore_array[i]);
     i++;
   }
@@ -315,6 +318,7 @@ void updatescore (int tempscore, char tempname[])
   FILE *edited_scoreboard = fopen("savedata/scores.sav", "w");
 
   while (j < totalscorenum) {
+    //printf("Scanned name: %s\nScanned score: %08d\n", updatescorename_array[j], updatescore_int_array[j]);
     fprintf(edited_scoreboard, "%s\n%08d\n", updatescorename_array[j], updatescore_int_array[j]);
     j++;
   }
@@ -385,7 +389,11 @@ bool loadscores()
   char score_array[totalscorenum + 1][10] = {0};
 
   while (i < totalscorenum) {
-    fscanf(scoreboard, "%s %s", scorename_array[i], score_array[i]);
+    fgets(scorename_array[i], 12, scoreboard);
+    scorename_array[i][strcspn(scorename_array[i], "\n")] = 0;
+    fgets(score_array[i], 10, scoreboard);
+    score_array[i][strcspn(score_array[i], "\n")] = 0;
+    //fscanf(scoreboard, "%s %s", scorename_array[i], score_array[i]);
     //printf("scorename scanned: %s\n", scorename_array[i]);
     i++;
   }
@@ -673,9 +681,9 @@ int main(int argc,char *argv[])
               }
             }
 
-            else if( e.type == SDL_TEXTINPUT )
+            else if( e.type == SDL_TEXTINPUT && e.key.keysym.sym != SDLK_RETURN)
   					{
-  						if(tempname.length() <= 10 && !in_game && in_scoresave)
+  						if(tempname.length() <= 9 && !in_game && in_scoresave)
   						{
   							tempname += e.text.text;
   							rerender_text = true;
@@ -777,7 +785,7 @@ int main(int argc,char *argv[])
            }
            if(!marker_coin[coins])
            {
-             marker_coin[coins] = 1;
+             marker_coin[coins++] = 1;
              ypos_coin[coins] = character_y - 200 - rand()%450;
              xpos_coin[coins] = 200 + rand()%700;
            }
@@ -919,10 +927,11 @@ int main(int argc,char *argv[])
                }
              }
            }
-           else if(marker_coin[w])
+           if(marker_coin[w])
            {
              if(is_colliding(character_x,character_y,xpos_coin[w],ypos_coin[w],coin_height,coin_width))
              {
+               xpos_coin[w]=0;
                ypos_coin[w]=15000;
                tempscore += 100;
              }
