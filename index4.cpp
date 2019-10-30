@@ -286,7 +286,7 @@ void padded_itoa(int a, char arr[])
 
 void updatescore (int tempscore, char tempname[])
 {
-  unsigned int i = 0, j = 0, k = 0;
+  unsigned int i = 0, j = 0, k = 0, l = 0;
 
   FILE *readscore = fopen("savedata/scores.sav", "r");
 
@@ -306,10 +306,17 @@ void updatescore (int tempscore, char tempname[])
 
   fclose(readscore);
 
+  if (tempscore < updatescore_int_array[totalscorenum - 1]) {
+    return;
+  }
+
   std::sort(updatescore_int_array, (updatescore_int_array + totalscorenum + 1), std::greater<int>());
 
   for (k = (totalscorenum - 1); k >= 0; k--) {
     if (tempscore == updatescore_int_array[k]) {
+      for (l = totalscorenum - 2; l >= k; l--) {
+        strcpy(updatescorename_array[l + 1], updatescorename_array[l]);
+      }
       strcpy(updatescorename_array[k], tempname);
       break;
     }
