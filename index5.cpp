@@ -68,6 +68,7 @@ SDL_Rect scorename_rect[totalscorenum];
 SDL_Rect score_rect[totalscorenum];
 SDL_Rect currentscore_rect;
 SDL_Rect scoresave_text_rect, scoresave_name_rect;
+SDL_Rect hof_bg_rect;
 TTF_Font *main_font;
 int tempscore = 0;
 char tempscore_string[9] = {0};
@@ -115,6 +116,7 @@ texture_jinish gari_left,gari_right,bus_left,bus_right,dotola_bus_left,dotola_bu
 texture_jinish chips,frooto,coin;
 texture_jinish scorename[10],score[10],currentscore,scoresave_text,scoresave_name;
 texture_jinish bike_up,bike_down;
+texture_jinish hof_bg;
 timer clock_release,clock_move,snacks,beka,tera;
 bool init();//Initialization
 bool loadMedia();//loads media
@@ -483,6 +485,7 @@ bool loadMedia()
   s = s & bike_up.loadFromFile("bike1.png");
   s = s & bike_down.loadFromFile("bike2.png");
   s = s & coin.loadFromFile("coinsprites/coinspritesheet.png");
+  s = s & hof_bg.loadFromFile("hof_bg.png");
   s = s & gari_left.loadFromFile("car4.png");
   s = s & gari_right.loadFromFile("car3.png");
   s = s & bus_left.loadFromFile("bus4.png");
@@ -503,6 +506,7 @@ bool loadMedia()
   chips_rect.x = 0,chips_rect.y = 0,chips_rect.w =48,chips_rect.h=60;
   frooto_rect.x = 0,frooto_rect.y = 0,frooto_rect.w = 24,frooto_rect.h = 60;
   currentscore_rect.x = 0,currentscore_rect.y = 0,currentscore_rect.w = 250,currentscore_rect.h = 50;
+  hof_bg_rect.x = 0,hof_bg_rect.y = 0,hof_bg_rect.w = 1280,hof_bg_rect.h = 720;
 
         int hx = 0,hy = 0,inter = 90;
         int hh=110,ww=90;
@@ -571,8 +575,6 @@ bool loadMedia()
       vehichle_down[1].x = vehichle_down[1].y = 0;vehichle_down[1].h = bus_height;vehichle_down[1].w=bus_width;
       vehichle_down[2].x = vehichle_down[2].y = 0;vehichle_down[2].h = dd_height;vehichle_down[2].w=dd_width;
       vehichle_down[3].x = vehichle_down[3].y = 0;vehichle_down[3].h = cng_height;vehichle_down[3].w=cng_width;
-
-
       vehichle_left[0].x = vehichle_left[0].y = 0;vehichle_left[0].w = car_height;vehichle_left[0].h=car_width;
       vehichle_left[1].x = vehichle_left[1].y = 0;vehichle_left[1].w = bus_height;vehichle_left[1].h=bus_width;
       vehichle_left[2].x = vehichle_left[2].y = 0;vehichle_left[2].w = dd_height;vehichle_left[2].h=dd_width;
@@ -592,6 +594,7 @@ void close()
   gari_up.free();bus_up.free();dotola_bus_up.free();cng_up.free();
   gari_down.free();bus_down.free();dotola_bus_down.free();cng_down.free();
   skeleton.free();
+  hof_bg.free();
   for (unsigned int scorequit_idx = 0; scorequit_idx < totalscorenum; scorequit_idx++) {
     score[scorequit_idx].free();
     scorename[scorequit_idx].free();
@@ -631,17 +634,20 @@ int main(int argc,char *argv[])
       bool quit = false;
       bool in_game=false;
       bool in_scoreboard = false;
-      bool marker_up[4][8];
-      bool marker_down[4][8];
-      bool marker_snacks[2][16];
-      bool marker_coin[16];
-      bool marker_left[4][8];
-      bool marker_right[4][8];
+      bool marker_up[4][8] = {0};
+      bool marker_down[4][8] = {0};
+      bool marker_left[4][8] = {0};
+      bool marker_right[4][8] = {0};
+      bool marker_snacks[2][16] = {0};
+      bool marker_coin[16] = {0};
       bool scores_open = false;
       bool rerender_text = false;
       bool savenow = false;
-      int l;
-      int snack;
+      bool game_paused = false;
+      bool loadstate = false;
+      int vehicle_variant_selector;
+      int snack_variant_selector;
+      int snack = 0;
       int car_up = 0,car_down=0,car_left=0,car_right=0;
       int stamina = 1280;
       int stamina_blow = 100;
@@ -649,56 +655,72 @@ int main(int argc,char *argv[])
       bool bike_down_stat = 0;
       int ypos_bike_up = 920;
       int ypos_bike_down = -200;
-      int xpos_bike=450;
+      int xpos_bike;
+      int bike_direction_selector;
+      int bike_lane_selector;
       bool midFrame=false,topFrame=true,bottomFrame=false;
-      for(int w=0;w<16;w++)
-      {
-        marker_coin[w]=0;
-      }
-      for(int w=0;w<16;w++)
-      {
-        marker_snacks[0][w] = marker_snacks[1][w]=0;
-      }
-      for(int q=0;q<4;q++)
-      {
-        for(int w=0;w<8;w++)
-        {
-          marker_up[q][w]=0;
-          marker_down[q][w]=0;
-          marker_left[q][w]=0;
-          marker_right[q][w]=0;
-        }
-      }
       int coins = 0;
-      int ypos_up[8],ypos_down[8];
-      int xpos_up[8],xpos_down[8];
-      int ypos_left[8],ypos_right[8];
-      int xpos_left[8],xpos_right[8];
+      int xpos_up[8] = {450,450,450,450,450,450,450,450};
+      int ypos_up[8] = {920,920,920,920,920,920,920,920};
+      int xpos_down[8] = {750,750,750,750,750,750,750,750};
+      int ypos_down[8] = {-400,-400,-400,-400,-400,-400,-400,-400};
+      int xpos_left[8] = {-100,-100,-100,-100,-100,-100,-100,-100};
+      int xpos_right[8] = {1100,1100,1100,1100,1100,1100,1100,1100};
       int y_left=-100,y_right=10;
-      for(int w=0;w<8;w++)
-      {
-        ypos_up[w]=920;
-        ypos_down[w] = -400;
-        xpos_up[w]=450;
-        xpos_down[w]=750;
-        ypos_left[w]=-60;
-        ypos_right[w]=-160;
-        xpos_left[w]=-100;
-        xpos_right[w]=1100;
-      }
-      int ypos_snack[16];
+      int ypos_snack[16] = {720,720,720,720,720,720,720,720,720,720,720,720,720,720,720,720};
       int xpos_snack[16];
-      int ypos_coin[16];
+      int ypos_coin[16] = {720,720,720,720,720,720,720,720,720,720,720,720,720,720,720,720};
       int xpos_coin[16];
-      for(int w=0;w<16;w++)
-      {
-        ypos_snack[w] = 720;
-        ypos_coin[w]=720;
-      }
       int c_f = 0;
       int fff;
       bool right_permit=1;
       bool left_permit=1;
+
+      int paused_side_walk_y_1;
+      int paused_side_walk_y_2;
+      int paused_side_walk_y_3;
+      int paused_side_walk_y_4;
+      int paused_character_x;
+      int paused_character_y;
+      int paused_road_x;
+      int paused_road_y_1;
+      int paused_road_y_2;
+      int paused_speed;
+      bool paused_marker_up[4][8];
+      bool paused_marker_down[4][8];
+      bool paused_marker_left[4][8];
+      bool paused_marker_right[4][8];
+      int paused_vehicle_variant_selector;
+      int paused_snack_variant_selector;
+      int paused_snack;
+      int paused_coins;
+      int paused_car_up;
+      int paused_car_down;
+      int paused_car_left;
+      int paused_car_right;
+      bool paused_midFrame, paused_topFrame, paused_bottomFrame;
+      int paused_stamina;
+      int paused_stamina_blow;
+      bool paused_bike_up_stat;
+      bool paused_bike_down_stat;
+      int paused_ypos_bike_up;
+      int paused_ypos_bike_down;
+      int paused_xpos_up[8];
+      int paused_xpos_down[8];
+      int paused_xpos_left[8];
+      int paused_xpos_right[8];
+      int paused_ypos_up[8];
+      int paused_ypos_down[8];
+      int paused_y_left;
+      int paused_y_right;
+      int paused_xpos_snack[16];
+      int paused_ypos_snack[16];
+      int paused_xpos_coin[16];
+      int paused_ypos_coin[16];
+      //int paused_fff;
+      bool paused_left_permit;
+      bool paused_right_permit;
+
       const Uint8 *state = SDL_GetKeyboardState(NULL);
       while(!quit)
       {
@@ -738,6 +760,15 @@ int main(int argc,char *argv[])
               {
                 savenow = true;
               }
+              else if(e.key.keysym.sym == SDLK_ESCAPE && in_game)
+              {
+                if (!game_paused) {
+                  game_paused = true;
+                }
+                else {
+                  game_paused = false;
+                }
+              }
             }
 
             else if( e.type == SDL_TEXTINPUT && e.key.keysym.sym != SDLK_RETURN)
@@ -760,8 +791,6 @@ int main(int argc,char *argv[])
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
           SDL_RenderClear( main_renderer );
           srand(time(NULL));
-        //  printf("%d %d\n",road_y_1,road_y_2);
-
         //  printf("%d %d \n", clock_release.getTicks(), clock_move.getTicks());
          if(car_up >= 8)car_up = 0;
          if(car_down >= 8)car_down = 0;
@@ -770,6 +799,65 @@ int main(int argc,char *argv[])
          if(snack >= 16)snack = 0;
          if(coins >= 16)coins = 0;
 
+         if(!game_paused)
+         {
+           if (loadstate) {
+              loadstate = false;
+              side_walk_y_1 = paused_side_walk_y_1;
+              side_walk_y_2 = paused_side_walk_y_2;
+              side_walk_y_3 = paused_side_walk_y_3;
+              side_walk_y_4 = paused_side_walk_y_4;
+              character_x = paused_character_x;
+              character_y = paused_character_y;
+              road_x = paused_road_x;
+              road_y_1 = paused_road_y_1;
+              road_y_2 = paused_road_y_2;
+              speed = paused_speed;
+              for (int paused_marker_vehicle_variant_idx = 0; paused_marker_vehicle_variant_idx < 4; paused_marker_vehicle_variant_idx++) {
+                for (int paused_marker_vehicle_queue_idx = 0; paused_marker_vehicle_queue_idx < 8; paused_marker_vehicle_queue_idx++) {
+                  marker_up[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = paused_marker_up[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
+                  marker_down[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = paused_marker_down[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
+                  marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = paused_marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
+                  marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = paused_marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
+                }
+              }
+              vehicle_variant_selector = paused_vehicle_variant_selector;
+              snack_variant_selector = paused_snack_variant_selector;
+              snack = paused_snack;
+              coins = paused_coins;
+              car_up = paused_car_up;
+              car_down = paused_car_down;
+              car_left = paused_car_left;
+              car_right = paused_car_right;
+              midFrame = paused_midFrame;
+              topFrame = paused_topFrame;
+              bottomFrame = paused_bottomFrame;
+              stamina = paused_stamina;
+              stamina_blow = paused_stamina_blow;
+              bike_up_stat = paused_bike_up_stat;
+              bike_down_stat = paused_bike_down_stat;
+              ypos_bike_up = paused_ypos_bike_up;
+              ypos_bike_down = paused_ypos_bike_down;
+              for (int paused_xypos_vehicle_idx = 0; paused_xypos_vehicle_idx < 8; paused_xypos_vehicle_idx++) {
+                xpos_up[paused_xypos_vehicle_idx] = paused_xpos_up[paused_xypos_vehicle_idx];
+                xpos_down[paused_xypos_vehicle_idx] = paused_xpos_down[paused_xypos_vehicle_idx];
+                ypos_up[paused_xypos_vehicle_idx] = paused_ypos_up[paused_xypos_vehicle_idx];
+                ypos_down[paused_xypos_vehicle_idx] = paused_ypos_down[paused_xypos_vehicle_idx];
+                xpos_left[paused_xypos_vehicle_idx] = paused_xpos_left[paused_xypos_vehicle_idx];
+                xpos_right[paused_xypos_vehicle_idx] = paused_xpos_right[paused_xypos_vehicle_idx];
+              }
+              y_left = paused_y_left;
+              y_right = paused_y_right;
+              for (int paused_xypos_consumable_idx = 0; paused_xypos_consumable_idx < 16; paused_xypos_consumable_idx++) {
+                xpos_snack[paused_xypos_consumable_idx] = paused_xpos_snack[paused_xypos_consumable_idx];
+                ypos_snack[paused_xypos_consumable_idx] = paused_ypos_snack[paused_xypos_consumable_idx];
+                xpos_coin[paused_xypos_consumable_idx] = paused_xpos_coin[paused_xypos_consumable_idx];
+                ypos_coin[paused_xypos_consumable_idx] = paused_ypos_coin[paused_xypos_consumable_idx];
+              }
+              //fff = paused_fff;
+              left_permit = paused_left_permit;
+              right_permit = paused_right_permit;
+           }
          fff = std::max(road_y_1,road_y_2);
          if(topFrame)
          {
@@ -837,17 +925,20 @@ int main(int argc,char *argv[])
            midFrame = false;
            bottomFrame = false;
          }
+
          if(clock_release.getTicks()%6000 < 15 && moto && !bike_up_stat && !bike_down_stat)
          {
-           if(rand()%2 == 0)
+           bike_direction_selector = rand()%2;
+           if(bike_direction_selector == 0)
            {
              bike_up_stat = 1;
              bike_down_stat = 0;
-             if(rand()%3 ==0)
+             bike_lane_selector = rand()%3;
+             if(bike_lane_selector == 0)
              {
                xpos_bike = 180;
              }
-             else if(rand()%3==1)
+             else if(bike_lane_selector == 1)
              {
               xpos_bike = 600;
              }
@@ -860,11 +951,12 @@ int main(int argc,char *argv[])
            {
              bike_up_stat = 0;
              bike_down_stat = 1;
-             if(rand()%3 ==0)
+             bike_lane_selector = rand()%3;
+             if(bike_lane_selector == 0)
              {
                xpos_bike = 200;
              }
-             else if(rand()%3==1)
+             else if(bike_lane_selector == 1)
              {
               xpos_bike = 600;
              }
@@ -874,72 +966,79 @@ int main(int argc,char *argv[])
              }
            }
          }
-         if(c_f >= 36)c_f = 0;
+
          c_f++;
+         if(c_f >= 36)c_f = 0;
+
          if(clock_release.getTicks()%1000 <= 20 && rand()%15<10)
          {
            srand(time(NULL));
-           l = rand()%4;
+           vehicle_variant_selector = rand()%4;
            if(!marker_up[0][car_up]&&!marker_up[1][car_up]&&!marker_up[2][car_up]&&!marker_up[3][car_up])
            {
              if(car_up> 0)
              {
                if(marker_up[0][car_up-1]|| marker_up[1][car_up-1]|| marker_up[2][car_up-1]||marker_up[3][car_up-1])
                {
-                 if(ypos_up[car_up-1]> 200)marker_up[l][car_up++]=1;
+                 if(ypos_up[car_up-1]> 200)marker_up[vehicle_variant_selector][car_up++]=1;
                }
-               else marker_up[l][car_up++]=1;
+               else marker_up[vehicle_variant_selector][car_up++]=1;
              }
              else
              {
                if(marker_up[0][7]|| marker_up[1][7]|| marker_up[2][7]||marker_up[3][7])
                {
-                 if(ypos_up[7]> 200)marker_up[l][car_up++]=1;
+                 if(ypos_up[7]> 200)marker_up[vehicle_variant_selector][car_up++]=1;
                }
-               else marker_up[l][car_up++]=1;
+               else marker_up[vehicle_variant_selector][car_up++]=1;
              }
+
            }
+
+
          }
+
          if(rand()%10 < 8 && snacks.getTicks()%1000 <= 20 && character_y <= 360 && state[SDL_SCANCODE_UP])
          {
            srand(time(NULL));
-           l = rand()%2;
+           snack_variant_selector = rand()%2;
            if(!marker_snacks[0][snack] && !marker_snacks[1][snack])
            {
-             marker_snacks[l][snack++]=1;
+             marker_snacks[snack_variant_selector][snack++]=1;
              ypos_snack[snack-1] = character_y - 400 - rand()%300;
              xpos_snack[snack-1]  = 300 +  rand()%600;
            }
            if(!marker_coin[coins])
            {
              marker_coin[coins++] = 1;
-             ypos_coin[coins] = character_y - 200 - rand()%450;
-             xpos_coin[coins] = 200 + rand()%700;
+             ypos_coin[coins-1] = character_y - 200 - rand()%450;
+             xpos_coin[coins-1] = 200 + rand()%700;
            }
          }
          srand(time(NULL));
          if(clock_release.getTicks()%1000 <= 20 && rand()%15<10)
          {
            srand(time(NULL));
-           l = (clock_move.getTicks()+rand())%4;
+           vehicle_variant_selector = (clock_move.getTicks()+rand())%4;
            if(!marker_down[0][car_down]&&!marker_down[1][car_down]&&!marker_down[2][car_down]&&!marker_down[3][car_down])
            {
              if(car_down> 0)
              {
                if(marker_down[0][car_down-1]|| marker_down[1][car_down-1]|| marker_down[2][car_down-1]||marker_down[3][car_down-1])
                {
-                 if(ypos_down[car_down-1]> 200)marker_down[l][car_down++]=1;
+                 if(ypos_down[car_down-1]> 200)marker_down[vehicle_variant_selector][car_down++]=1;
                }
-               else marker_down[l][car_down++]=1;
+               else marker_down[vehicle_variant_selector][car_down++]=1;
              }
              else
              {
                if(marker_down[0][7]|| marker_down[1][7]|| marker_down[2][7]||marker_down[3][7])
                {
-                 if(ypos_down[7]> 200)marker_down[l][car_down++]=1;
+                 if(ypos_down[7]> 200)marker_down[vehicle_variant_selector][car_down++]=1;
                }
-               else  marker_down[l][car_down++]=1;
+               else  marker_down[vehicle_variant_selector][car_down++]=1;
              }
+
            }
          }
          //SDL_Delay(5);
@@ -1001,6 +1100,7 @@ int main(int argc,char *argv[])
                break;
              }
            }
+
            if(is_colliding(character_x,character_y,xpos_up[w],ypos_up[w],h1,w1) || is_colliding(character_x,character_y,xpos_down[w],ypos_down[w],h2,w2))
            {
              character_x=100;
@@ -1137,12 +1237,11 @@ int main(int argc,char *argv[])
          {
            for(int w=0;w<8;w++)
            {
-
              if(marker_up[0][w]||marker_up[1][w]||marker_up[2][w]||marker_up[3][w])
              {
                if(ypos_up[w]>= y_left && ypos_up[w]<=820)left_permit=0;
                if(ypos_up[w]>=y_right && ypos_up[w] <= 820)right_permit=0;
-               ypos_up[w]-=(fps + fps/4 + (speed-2)*state[SDL_SCANCODE_UP] );//- fps*state[SDL_SCANCODE_UP]);
+               ypos_up[w]-=(fps + fps/4 + (speed-2)*state[SDL_SCANCODE_UP] );
              }
              if(marker_down[0][w]||marker_down[1][w]||marker_down[2][w]||marker_down[3][w])
              {
@@ -1170,10 +1269,10 @@ int main(int argc,char *argv[])
          if(left_permit)
          {
            srand(time(NULL));
-           l = rand()%4;
+           vehicle_variant_selector = rand()%4;
            if(tera.getTicks() >= 1500)
            {
-             marker_left[l][car_left++]=1;
+             marker_left[vehicle_variant_selector][car_left++]=1;
              left_permit=0;
              tera.stop();
              tera.start();
@@ -1184,10 +1283,10 @@ int main(int argc,char *argv[])
          if(right_permit)
          {
            srand(time(NULL));
-           l = rand()%4;
+           vehicle_variant_selector = rand()%4;
            if(beka.getTicks() >= 1500)
            {
-             marker_right[l][car_right++]=1;
+             marker_right[vehicle_variant_selector][car_right++]=1;
              right_permit = 0;
              beka.stop();
              beka.start();
@@ -1275,6 +1374,7 @@ int main(int argc,char *argv[])
           if(side_walk_y_2 >= 1440)side_walk_y_2=-1440;
           if(side_walk_y_3 >= 1440)side_walk_y_3=-1440;
           if(side_walk_y_4 >= 1440)side_walk_y_4=-1440;
+        }
           road.render(road_x,road_y_1,&road_rect);
           road.render(road_x,road_y_2,&road_rect);//two road tiling one after another creating an illusion of continuity
           side_walk.render(road_x-170,side_walk_y_1,&side_walk_rect);
@@ -1308,7 +1408,6 @@ int main(int argc,char *argv[])
             else if(marker_left[1][w]==1)bus_left.render(xpos_left[w],y_left,&vehichle_left[1]);
             else if(marker_left[2][w]==1)dotola_bus_left.render(xpos_left[w],y_left,&vehichle_left[2]);
             else if(marker_left[3][w]==1)cng_left.render(xpos_left[w],y_left,&vehichle_left[3]);
-
           }
           for(int w=0;w<8;w++)
           {
@@ -1339,7 +1438,8 @@ int main(int argc,char *argv[])
             SDL_RenderFillRect( main_renderer, &stam );
             SDL_RenderPresent(main_renderer);
           }
-
+          if(!game_paused)
+          {
           if(state[SDL_SCANCODE_UP] ||state[SDL_SCANCODE_LEFT]||state[SDL_SCANCODE_RIGHT]||state[SDL_SCANCODE_DOWN])//if we're playing the game, then these conditions apply
           {
             if(state[SDL_SCANCODE_UP] )
@@ -1349,7 +1449,7 @@ int main(int argc,char *argv[])
               if(character_y <= 360)
               {
                 tempscore++;
-              //  printf("%d\n", tempscore);
+                //printf("%d\n", tempscore);
                 padded_itoa(tempscore, tempscore_string);
                 road_y_1+=fps;
                 road_y_2 +=fps;
@@ -1408,6 +1508,69 @@ int main(int argc,char *argv[])
             f++;
             if(f >= 9)f=0;
           }
+        }
+          if (game_paused) {
+            paused_side_walk_y_1 = side_walk_y_1;
+            paused_side_walk_y_2 = side_walk_y_2;
+            paused_side_walk_y_3 = side_walk_y_3;
+            paused_side_walk_y_4 = side_walk_y_4;
+            paused_character_x = character_x;
+            paused_character_y = character_y;
+            paused_road_x = road_x;
+            paused_road_y_1 = road_y_1;
+            paused_road_y_2 = road_y_2;
+            paused_speed = speed;
+            for (int paused_marker_vehicle_variant_idx = 0; paused_marker_vehicle_variant_idx < 4; paused_marker_vehicle_variant_idx++) {
+              for (int paused_marker_vehicle_queue_idx = 0; paused_marker_vehicle_queue_idx < 8; paused_marker_vehicle_queue_idx++) {
+                paused_marker_up[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = marker_up[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
+                paused_marker_down[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = marker_down[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
+                paused_marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
+                paused_marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
+              }
+            }
+            paused_vehicle_variant_selector = vehicle_variant_selector;
+            paused_snack_variant_selector = snack_variant_selector;
+            paused_snack = snack;
+            paused_coins = coins;
+            paused_car_up = car_up;
+            paused_car_down = car_down;
+            paused_car_left = car_left;
+            paused_car_right = car_right;
+            paused_midFrame = midFrame;
+            paused_topFrame = topFrame;
+            paused_bottomFrame = bottomFrame;
+            paused_stamina = stamina;
+            paused_stamina_blow = stamina_blow;
+            paused_bike_up_stat = bike_up_stat;
+            paused_bike_down_stat = bike_down_stat;
+            paused_ypos_bike_up = ypos_bike_up;
+            paused_ypos_bike_down = ypos_bike_down;
+            for (int paused_xypos_vehicle_idx = 0; paused_xypos_vehicle_idx < 8; paused_xypos_vehicle_idx++) {
+              paused_xpos_up[paused_xypos_vehicle_idx] = xpos_up[paused_xypos_vehicle_idx];
+              paused_xpos_down[paused_xypos_vehicle_idx] = xpos_down[paused_xypos_vehicle_idx];
+              paused_ypos_up[paused_xypos_vehicle_idx] = ypos_up[paused_xypos_vehicle_idx];
+              paused_ypos_down[paused_xypos_vehicle_idx] = ypos_down[paused_xypos_vehicle_idx];
+              paused_xpos_left[paused_xypos_vehicle_idx] = xpos_left[paused_xypos_vehicle_idx];
+              paused_xpos_right[paused_xypos_vehicle_idx] = xpos_right[paused_xypos_vehicle_idx];
+            }
+            paused_y_left = y_left;
+            paused_y_right = y_right;
+            for (int paused_xypos_consumable_idx = 0; paused_xypos_consumable_idx < 16; paused_xypos_consumable_idx++) {
+              paused_xpos_snack[paused_xypos_consumable_idx] = xpos_snack[paused_xypos_consumable_idx];
+              paused_ypos_snack[paused_xypos_consumable_idx] = ypos_snack[paused_xypos_consumable_idx];
+              paused_xpos_coin[paused_xypos_consumable_idx] = xpos_coin[paused_xypos_consumable_idx];
+              paused_ypos_coin[paused_xypos_consumable_idx] = ypos_coin[paused_xypos_consumable_idx];
+            }
+            //paused_fff = fff;
+            paused_left_permit = left_permit;
+            paused_right_permit = right_permit;
+
+            printf("Saved state\n");
+            game_paused = false;
+            loadstate = true;
+            in_game = false;
+
+          }
           SDL_Delay(10);
 
 
@@ -1416,6 +1579,8 @@ int main(int argc,char *argv[])
         {
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
           SDL_RenderClear( main_renderer );
+
+          hof_bg.render(0, 0, &hof_bg_rect);
 
           if (!scores_open)
           {
@@ -1429,8 +1594,8 @@ int main(int argc,char *argv[])
             }
           }
 
-          int score_render_x = 900, score_render_initial_y = 100;
-          int scorename_render_x = 100, scorename_render_initial_y = 100;
+          int score_render_x = 950, score_render_initial_y = 144;
+          int scorename_render_x = 150, scorename_render_initial_y = 144;
 
           for (unsigned int score_render_idx = 0; score_render_idx < totalscorenum; score_render_idx++, scorename_render_initial_y += 50, score_render_initial_y += 50) {
             scorename[score_render_idx].render(scorename_render_x, scorename_render_initial_y, &scorename_rect[score_render_idx]);
