@@ -1081,14 +1081,14 @@ int main(int argc,char *argv[])
 
              if(marker_up[0][w]||marker_up[1][w]||marker_up[2][w]||marker_up[3][w])
              {
-               if(ypos_up[w]>= y_left && ypos_up[w]<=720)left_permit=0;
-               if(ypos_up[w]>=y_right && ypos_up[w] <= 720)right_permit=0;
+               if(ypos_up[w]>= y_left && ypos_up[w]<=820)left_permit=0;
+               if(ypos_up[w]>=y_right && ypos_up[w] <= 820)right_permit=0;
                ypos_up[w]-=(fps + fps/4 + (speed-2)*state[SDL_SCANCODE_UP] );//- fps*state[SDL_SCANCODE_UP]);
              }
              if(marker_down[0][w]||marker_down[1][w]||marker_down[2][w]||marker_down[3][w])
              {
-               if(ypos_down[w]<=y_left && ypos_down[w]>-200)left_permit=0;
-               if(ypos_down[w]<=y_right && ypos_down[w]>-200)right_permit=0;
+               if(ypos_down[w]<=y_left && ypos_down[w]>-300)left_permit=0;
+               if(ypos_down[w]<=y_right && ypos_down[w]>-300)right_permit=0;
                ypos_down[w]+=(fps +fps/4 + (speed+1)*state[SDL_SCANCODE_UP]);
              }
            }
@@ -1189,7 +1189,7 @@ int main(int argc,char *argv[])
            }
            if(marker_left[0][w]||marker_left[1][w]||marker_left[2][w]||marker_left[3][w])
            {
-             if(xpos_left[w]>1080)
+             if(xpos_left[w]>1500)
              {
                marker_left[0][w]=0;
                marker_left[1][w]=0;
@@ -1200,7 +1200,7 @@ int main(int argc,char *argv[])
            }
            if(marker_right[0][w] || marker_right[1][w] || marker_right[2][w] || marker_right[3][w])
            {
-             if(xpos_right[w]<0)
+             if(xpos_right[w]<-200)
              {
                marker_right[0][w]=0;
                marker_right[1][w]=0;
