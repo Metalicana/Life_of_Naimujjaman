@@ -1001,8 +1001,67 @@ int main(int argc,char *argv[])
                break;
              }
            }
-
            if(is_colliding(character_x,character_y,xpos_up[w],ypos_up[w],h1,w1) || is_colliding(character_x,character_y,xpos_down[w],ypos_down[w],h2,w2))
+           {
+             character_x=100;
+             stamina-=stamina_blow;
+             //SDL_Delay(50);
+           }
+           for(int q=0;q<4;q++)
+           {
+             if(marker_right[w][q])
+             {
+               if(q == 0)
+               {
+                 w1 = car_height;
+                 h1 = car_width;
+               }
+               else if(q == 1)
+               {
+                 w1 = bus_height;
+                 h1 = bus_width;
+               }
+               else if(q==2)
+               {
+                 w1 = dd_height;
+                 h1 = dd_width;
+               }
+               else
+               {
+                 w1 = cng_height;
+                 h1 = cng_width;
+               }
+               break;
+             }
+           }
+           for(int q=0;q<4;q++)
+           {
+             if(marker_left[w][q])
+             {
+               if(q == 0)
+               {
+                 w2 = car_height;
+                 h2 = car_width;
+               }
+               else if(q == 1)
+               {
+                 w2 = bus_height;
+                 h2 = bus_width;
+               }
+               else if(q==2)
+               {
+                 w2 = dd_height;
+                 h2 = dd_width;
+               }
+               else
+               {
+                 w2 = cng_height;
+                 h2 = cng_width;
+               }
+               break;
+             }
+           }
+           if(is_colliding(character_x,character_y,xpos_right[w],y_right,h1,w1) || is_colliding(character_x,character_y,xpos_left[w],y_left,h2,w2))
            {
              character_x=100;
              stamina-=stamina_blow;
