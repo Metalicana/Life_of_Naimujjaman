@@ -9,6 +9,7 @@
 #include <vector>
 #include <time.h>
 #include <stdlib.h>
+#include <iostream>
 #include <cstring>
 #define ekhon e.key.keysym.sym
 #define hover1 mx >= play_button_x && mx <= play_button_x+ button_width && my >= play_button_y && my <= play_button_y + button_height
@@ -117,7 +118,7 @@ texture_jinish gari_left,gari_right,bus_left,bus_right,dotola_bus_left,dotola_bu
 texture_jinish chips,frooto,coin;
 texture_jinish scorename[10],score[10],currentscore,scoresave_text,scoresave_name;
 texture_jinish bike_up,bike_down;
-timer clock_release,clock_move,snacks;
+timer clock_release,clock_move,snacks,beka,tera;
 bool init();//Initialization
 bool loadMedia();//loads media
 void close();//memory saving before closing
@@ -480,14 +481,14 @@ bool loadMedia()
   s = s & bike_up.loadFromFile("bike1.png");
   s = s & bike_down.loadFromFile("bike2.png");
   s = s & coin.loadFromFile("coinsprites/coinspritesheet.png");
-  s = s & gari_left.loadFromFile("car3.png");
-  s = s & gari_right.loadFromFile("car4.png");
-  s = s & bus_left.loadFromFile("bus3.png");
-  s = s & bus_right.loadFromFile("bus4.png");
-  s = s & dotola_bus_left.loadFromFile("dd3.png");
-  s = s & dotola_bus_right.loadFromFile("dd4.png");
-  s = s & cng_left.loadFromFile("cng3.png");
-  s = s & cng_right.loadFromFile("cng4.png");
+  s = s & gari_left.loadFromFile("car4.png");
+  s = s & gari_right.loadFromFile("car3.png");
+  s = s & bus_left.loadFromFile("bus4.png");
+  s = s & bus_right.loadFromFile("bus3.png");
+  s = s & dotola_bus_left.loadFromFile("dd4.png");
+  s = s & dotola_bus_right.loadFromFile("dd3.png");
+  s = s & cng_left.loadFromFile("cng4.png");
+  s = s & cng_right.loadFromFile("cng3.png");
   main_font = TTF_OpenFont("main_font.ttf", 48);
 
   play_button_rect.x = 0;play_button_rect.y = 0;play_button_rect.h = 119;play_button_rect.w = 363;
@@ -647,6 +648,7 @@ int main(int argc,char *argv[])
       int ypos_bike_up = 920;
       int ypos_bike_down = -200;
       int xpos_bike=450;
+      bool midFrame=false,topFrame=true,bottomFrame=false;
       for(int w=0;w<16;w++)
       {
         marker_coin[w]=0;
@@ -670,16 +672,17 @@ int main(int argc,char *argv[])
       int xpos_up[8],xpos_down[8];
       int ypos_left[8],ypos_right[8];
       int xpos_left[8],xpos_right[8];
+      int y_left=-100,y_right=10;
       for(int w=0;w<8;w++)
       {
         ypos_up[w]=920;
-        ypos_down[w] = -200;
+        ypos_down[w] = -400;
         xpos_up[w]=450;
         xpos_down[w]=750;
         ypos_left[w]=-60;
         ypos_right[w]=-160;
         xpos_left[w]=-100;
-        xpos_right[w]=1090;
+        xpos_right[w]=1100;
       }
       int ypos_snack[16];
       int xpos_snack[16];
@@ -691,6 +694,9 @@ int main(int argc,char *argv[])
         ypos_coin[w]=720;
       }
       int c_f = 0;
+      int fff;
+      bool right_permit=1;
+      bool left_permit=1;
       const Uint8 *state = SDL_GetKeyboardState(NULL);
       while(!quit)
       {
@@ -704,6 +710,8 @@ int main(int argc,char *argv[])
                 clock_release.start();
                 clock_move.start();
                 snacks.start();
+                beka.start();
+                tera.start();
                 in_game = true;
               }
               else if((hover2) && !in_game && !in_scoreboard && !in_scoresave)
@@ -750,6 +758,8 @@ int main(int argc,char *argv[])
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
           SDL_RenderClear( main_renderer );
           srand(time(NULL));
+        //  printf("%d %d\n",road_y_1,road_y_2);
+
         //  printf("%d %d \n", clock_release.getTicks(), clock_move.getTicks());
          if(car_up >= 8)car_up = 0;
          if(car_down >= 8)car_down = 0;
@@ -757,6 +767,74 @@ int main(int argc,char *argv[])
          if(car_right >= 8)car_right = 0;
          if(snack >= 16)snack = 0;
          if(coins >= 16)coins = 0;
+
+         fff = std::max(road_y_1,road_y_2);
+         if(topFrame)
+         {
+            y_right = fff+150;
+            y_left = 1080;
+         }
+         else if(midFrame)
+         {
+           y_left = fff-200;
+           y_right =fff+150;
+         }
+         else if(bottomFrame)
+         {
+           y_left = fff+360;
+           y_right = 1080;
+         }
+         else
+         {
+           y_left = 1080;
+           y_right = 1080;
+           for(int w=0;w<8;w++)
+           {
+             if(marker_left[0][w]||marker_left[1][w]||marker_left[2][w]||marker_left[3][w])
+             {
+                 marker_left[0][w]=0;
+                 marker_left[1][w]=0;
+                 marker_left[2][w]=0;
+                 marker_left[3][w]=0;
+                 xpos_left[w]=0;
+             }
+             if(marker_right[0][w] || marker_right[1][w] || marker_right[2][w] || marker_right[3][w])
+             {
+
+                 marker_right[0][w]=0;
+                 marker_right[1][w]=0;
+                 marker_right[2][w]=0;
+                 marker_right[3][w]=0;
+                 xpos_right[w]=1080;
+
+             }
+           }
+         }
+         //printf("%d %d\n",y_left,y_right);
+         if(fff >= 0 && fff<=360)
+         {
+           topFrame = true;
+           midFrame = false;
+           bottomFrame = false;
+         }
+         else if(fff >= 360 && fff <= 720)
+         {
+           topFrame = false;
+           midFrame = true;
+           bottomFrame = false;
+         }
+         else if(fff >= 720 && fff <= 1080)
+         {
+           topFrame = false;
+           midFrame = false;
+           bottomFrame = true;
+         }
+         else
+         {
+           topFrame = false;
+           midFrame = false;
+           bottomFrame = false;
+         }
          if(clock_release.getTicks()%6000 < 15 && moto && !bike_up_stat && !bike_down_stat)
          {
            if(rand()%2 == 0)
@@ -817,11 +895,9 @@ int main(int argc,char *argv[])
                  if(ypos_up[7]> 200)marker_up[l][car_up++]=1;
                }
                else marker_up[l][car_up++]=1;
-             }//marker_up[l][car_up++]=1;
-
+             }
            }
          }
-        // printf("%d %d\n",character_x,character_y);
          if(rand()%10 < 8 && snacks.getTicks()%1000 <= 20 && character_y <= 360 && state[SDL_SCANCODE_UP])
          {
            srand(time(NULL));
@@ -862,8 +938,6 @@ int main(int argc,char *argv[])
                }
                else  marker_down[l][car_down++]=1;
              }
-             //marker_down[l][car_down++]=1;
-
            }
          }
          //SDL_Delay(5);
@@ -1002,19 +1076,63 @@ int main(int argc,char *argv[])
          {
            for(int w=0;w<8;w++)
            {
+
              if(marker_up[0][w]||marker_up[1][w]||marker_up[2][w]||marker_up[3][w])
              {
-               //printf("%d",state[SDL_SCANCODE_UP]);
-               ypos_up[w]-=(fps + fps/3 + (speed-2)*state[SDL_SCANCODE_UP] );//- fps*state[SDL_SCANCODE_UP]);
+               if(ypos_up[w]>= y_left && ypos_up[w]<=720)left_permit=0;
+               if(ypos_up[w]>=y_right && ypos_up[w] <= 720)right_permit=0;
+               ypos_up[w]-=(fps + fps/4 + (speed-2)*state[SDL_SCANCODE_UP] );//- fps*state[SDL_SCANCODE_UP]);
              }
              if(marker_down[0][w]||marker_down[1][w]||marker_down[2][w]||marker_down[3][w])
              {
-               ypos_down[w]+=(fps +fps/3 + (speed+1)*state[SDL_SCANCODE_UP]);
+               if(ypos_down[w]<=y_left && ypos_down[w]>-200)left_permit=0;
+               if(ypos_down[w]<=y_right && ypos_down[w]>-200)right_permit=0;
+               ypos_down[w]+=(fps +fps/4 + (speed+1)*state[SDL_SCANCODE_UP]);
              }
            }
            if(bike_up_stat)ypos_bike_up -= fps*2;
            if(bike_down_stat)ypos_bike_down += fps*2;
          }
+         for(int w=0;w<8;w++)
+         {
+
+           if(marker_left[0][w]||marker_left[1][w]||marker_left[2][w]||marker_left[3][w])
+           {
+            // printf("FCK YOUUUUU\n");
+             xpos_left[w]+=2*fps;//- fps*state[SDL_SCANCODE_UP]);
+           }
+           if(marker_right[0][w]||marker_right[1][w]||marker_right[2][w]||marker_right[3][w])
+           {
+             xpos_right[w]-=2*fps;
+           }
+         }
+         if(left_permit)
+         {
+           srand(time(NULL));
+           l = rand()%4;
+           if(tera.getTicks() >= 1500)
+           {
+             marker_left[l][car_left++]=1;
+             left_permit=0;
+             tera.stop();
+             tera.start();
+            // printf("%d\n",tera.getTicks());
+           }
+         }
+         else left_permit=1;
+         if(right_permit)
+         {
+           srand(time(NULL));
+           l = rand()%4;
+           if(beka.getTicks() >= 1500)
+           {
+             marker_right[l][car_right++]=1;
+             right_permit = 0;
+             beka.stop();
+             beka.start();
+           }
+         }
+         else right_permit = 1;
          if(bike_up_stat)
          {
            if(character_y - ypos_bike_up > 720)
@@ -1053,7 +1171,7 @@ int main(int argc,char *argv[])
                marker_up[1][w]=0;
                marker_up[2][w]=0;
                marker_up[3][w]=0;
-               ypos_up[w]=920;
+               ypos_up[w]=1080;
              }
            }
            if(marker_down[0][w] || marker_down[1][w] || marker_down[2][w] || marker_down[3][w])
@@ -1064,7 +1182,29 @@ int main(int argc,char *argv[])
                marker_down[1][w]=0;
                marker_down[2][w]=0;
                marker_down[3][w]=0;
-               ypos_down[w]=-200;
+               ypos_down[w]=-720;
+             }
+           }
+           if(marker_left[0][w]||marker_left[1][w]||marker_left[2][w]||marker_left[3][w])
+           {
+             if(xpos_left[w]>1080)
+             {
+               marker_left[0][w]=0;
+               marker_left[1][w]=0;
+               marker_left[2][w]=0;
+               marker_left[3][w]=0;
+               xpos_left[w]=-100;
+             }
+           }
+           if(marker_right[0][w] || marker_right[1][w] || marker_right[2][w] || marker_right[3][w])
+           {
+             if(xpos_right[w]<0)
+             {
+               marker_right[0][w]=0;
+               marker_right[1][w]=0;
+               marker_right[2][w]=0;
+               marker_right[3][w]=0;
+               xpos_right[w]=1100;
              }
            }
          }
@@ -1103,6 +1243,11 @@ int main(int argc,char *argv[])
             else if(marker_up[1][w]==1)bus_up.render(450,ypos_up[w],&vehichle_up[1]);
             else if(marker_up[2][w]==1)dotola_bus_up.render(450,ypos_up[w],&vehichle_up[2]);
             else if(marker_up[3][w]==1)cng_up.render(450,ypos_up[w],&vehichle_up[3]);
+            if(marker_left[0][w]== 1)gari_left.render(xpos_left[w],y_left,&vehichle_left[0]);
+            else if(marker_left[1][w]==1)bus_left.render(xpos_left[w],y_left,&vehichle_left[1]);
+            else if(marker_left[2][w]==1)dotola_bus_left.render(xpos_left[w],y_left,&vehichle_left[2]);
+            else if(marker_left[3][w]==1)cng_left.render(xpos_left[w],y_left,&vehichle_left[3]);
+
           }
           for(int w=0;w<8;w++)
           {
@@ -1110,6 +1255,10 @@ int main(int argc,char *argv[])
             else if(marker_down[1][w]==1)bus_down.render(750,ypos_down[w],&vehichle_down[1]);
             else if(marker_down[2][w]==1)dotola_bus_down.render(750,ypos_down[w],&vehichle_down[2]);
             else if(marker_down[3][w]==1)cng_down.render(750,ypos_down[w],&vehichle_down[3]);
+            if(marker_right[0][w]== 1)gari_right.render(xpos_right[w],y_right,&vehichle_right[0]);
+            else if(marker_right[1][w]==1)bus_right.render(xpos_right[w],y_right,&vehichle_right[1]);
+            else if(marker_right[2][w]==1)dotola_bus_right.render(xpos_right[w],y_right,&vehichle_right[2]);
+            else if(marker_right[3][w]==1)cng_right.render(xpos_right[w],y_right,&vehichle_right[3]);
           }
           if(bike_up_stat)bike_up.render(xpos_bike,ypos_bike_up,&bike_up_rect);
           if(bike_down_stat)bike_down.render(xpos_bike,ypos_bike_down,&bike_down_rect);
@@ -1139,7 +1288,7 @@ int main(int argc,char *argv[])
               if(character_y <= 360)
               {
                 tempscore++;
-                printf("%d\n", tempscore);
+              //  printf("%d\n", tempscore);
                 padded_itoa(tempscore, tempscore_string);
                 road_y_1+=fps;
                 road_y_2 +=fps;
