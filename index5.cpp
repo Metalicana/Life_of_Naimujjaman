@@ -1044,11 +1044,11 @@ int main(int argc,char *argv[])
          //SDL_Delay(5);
          for(int w=0;w<8;w++)
          {
-           int h1,w1,h2,w2;
+           int h1=0,w1=0,h2=0,w2=0;
 
            for(int q=0;q<4;q++)
            {
-             if(marker_up[w][q])
+             if(marker_up[q][w])
              {
                if(q == 0)
                {
@@ -1075,7 +1075,7 @@ int main(int argc,char *argv[])
            }
            for(int q=0;q<4;q++)
            {
-             if(marker_down[w][q])
+             if(marker_down[q][w])
              {
                if(q == 0)
                {
@@ -1107,9 +1107,10 @@ int main(int argc,char *argv[])
              stamina-=stamina_blow;
              //SDL_Delay(50);
            }
+           h1=0,w1=0,w2=0,h2=0;
            for(int q=0;q<4;q++)
            {
-             if(marker_right[w][q])
+             if(marker_right[q][w])
              {
                if(q == 0)
                {
@@ -1136,7 +1137,7 @@ int main(int argc,char *argv[])
            }
            for(int q=0;q<4;q++)
            {
-             if(marker_left[w][q])
+             if(marker_left[q][w])
              {
                if(q == 0)
                {
