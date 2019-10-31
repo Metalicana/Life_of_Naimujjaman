@@ -772,7 +772,7 @@ int main(int argc,char *argv[])
          if(topFrame)
          {
             y_right = fff+150;
-            y_left = 1080;
+            y_left = fff-200;
          }
          else if(midFrame)
          {
@@ -781,8 +781,8 @@ int main(int argc,char *argv[])
          }
          else if(bottomFrame)
          {
-           y_left = fff+360;
-           y_right = 1080;
+           y_left = fff-200;
+           y_right = fff+150;
          }
          else
          {
@@ -811,13 +811,13 @@ int main(int argc,char *argv[])
            }
          }
          //printf("%d %d\n",y_left,y_right);
-         if(fff >= 0 && fff<=360)
+         if(fff >= 0 && fff<=180)
          {
            topFrame = true;
            midFrame = false;
            bottomFrame = false;
          }
-         else if(fff >= 360 && fff <= 720)
+         else if(fff >= 180 && fff <= 720)
          {
            topFrame = false;
            midFrame = true;
