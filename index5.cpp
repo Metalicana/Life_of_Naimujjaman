@@ -12,9 +12,6 @@
 #include <iostream>
 #include <cstring>
 #define ekhon e.key.keysym.sym
-#define hover1 mx >= play_button_x && mx <= play_button_x+ button_width && my >= play_button_y && my <= play_button_y + button_height
-#define hover2 mx >= quit_button_x && mx <= quit_button_x + button_width && my >= quit_button_y && my <= quit_button_y + button_height
-#define hover3 mx >= hof_button_x && mx <= hof_button_x + button_width && my >= hof_button_y && my <= hof_button_y + button_height
 const int SW = 1280;
 const int SH = 720;
 const unsigned int totalscorenum = 10;
@@ -456,6 +453,11 @@ bool is_colliding(int x1,int y1,int x2,int y2,int h,int w)
   if(y < yy)return false;
   return true;
 }
+bool hover(int mx,int my,int btn_x,int btn_y,int btn_height,int btn_width)
+{
+  if(mx >= btn_x && mx <= btn_x + btn_width && my >= btn_y && my <= btn_y + btn_height)return 1;
+  return 0;
+}
 bool loadMedia()
 {
   bool s = true;
@@ -705,7 +707,7 @@ int main(int argc,char *argv[])
             if(e.type == SDL_MOUSEBUTTONDOWN)
             {
               SDL_GetMouseState(&mx,&my);
-              if((hover1) && !in_game && !in_scoreboard && !in_scoresave)
+              if((hover(mx,my,play_button_x,play_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 clock_release.start();
                 clock_move.start();
@@ -714,11 +716,11 @@ int main(int argc,char *argv[])
                 tera.start();
                 in_game = true;
               }
-              else if((hover2) && !in_game && !in_scoreboard && !in_scoresave)
+              else if((hover(mx,my,quit_button_x,quit_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 quit = true;
               }
-              else if((hover3) && !in_game && !in_scoreboard && !in_scoresave)
+              else if((hover(mx,my,hof_button_x,hof_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 in_scoreboard = true;
               }
@@ -1428,7 +1430,7 @@ int main(int argc,char *argv[])
         else
         {
           SDL_GetMouseState(&mx,&my);//current mouce coordinates
-          if(hover1)
+          if(hover(mx,my,play_button_x,play_button_y,button_height,button_width))
           {
             SDL_Delay(50);
             p_f--;//if we hover over play button then run frames for play animation
@@ -1438,7 +1440,7 @@ int main(int argc,char *argv[])
             if(q_f >= 6)q_f = 6;
             if(h_f >= 6)h_f = 6;
           }
-          else if(hover2)
+          else if(hover(mx,my,quit_button_x,quit_button_y,button_height,button_width))
           {
             SDL_Delay(50);
             q_f--;//if we hover over quit button then run frames for quit animation
@@ -1448,7 +1450,7 @@ int main(int argc,char *argv[])
             if(p_f >= 6)p_f=6;
             if(h_f >= 6)h_f=6;
           }
-          else if(hover3)
+          else if(hover(mx,my,hof_button_x,hof_button_y,button_height,button_width))
           {
             SDL_Delay(50);
             h_f--;//if we hover over quit button then run frames for quit animation
