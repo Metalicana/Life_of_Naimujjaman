@@ -22,9 +22,13 @@ const int button_height = 119;
 const int button_width = 323;
 const int coin_width = 32;
 const int coin_height = 32;
-const int play_button_x =450,play_button_y = 350;
-const int quit_button_x = 450,quit_button_y = 550;
-const int hof_button_x = 450,hof_button_y = 450;
+const int play_button_x = 275,play_button_y = 400;
+const int load_button_x = 275,load_button_y = 500;
+const int quit_button_x = 625,quit_button_y = 500;
+const int hof_button_x = 625,hof_button_y = 400;
+const int resume_button_x = 450, resume_button_y = 300;
+const int state_button_x = 450, state_button_y = 400;
+const int menu_button_x = 450, menu_button_y = 500;
 const int fps = 8;
 const int car_height = 200;
 const int car_width = 90;
@@ -51,8 +55,12 @@ SDL_Rect going_down[walking];
 SDL_Rect going_left[walking];
 SDL_Rect going_right[walking];
 SDL_Rect play_button_rect;
+SDL_Rect load_button_rect;
 SDL_Rect quit_button_rect;
 SDL_Rect hof_button_rect;
+SDL_Rect resume_button_rect;
+SDL_Rect state_button_rect;
+SDL_Rect menu_button_rect;
 SDL_Rect button_shadow_array[button_animation];
 SDL_Rect vehichle_up[4];
 SDL_Rect vehichle_down[4];
@@ -66,9 +74,11 @@ SDL_Rect side_walk_rect,side_walk_rect_2;
 SDL_Rect chips_rect,frooto_rect;
 SDL_Rect scorename_rect[totalscorenum];
 SDL_Rect score_rect[totalscorenum];
-SDL_Rect currentscore_rect;
+SDL_Rect currentscore_rect,currentscore_backdrop_rect;
 SDL_Rect scoresave_text_rect, scoresave_name_rect;
 SDL_Rect hof_bg_rect;
+SDL_Rect pause_screen_rect;
+SDL_Rect savestate_dlg_rect;
 TTF_Font *main_font;
 int tempscore = 0;
 char tempscore_string[9] = {0};
@@ -109,14 +119,16 @@ private:
   bool mPaused,mStarted;
 };
 
-texture_jinish skeleton,play_button,quit_button,hof_button,button_shadow,logo,road,side_walk,side_walk_2;//textures
+texture_jinish skeleton,play_button,load_button,quit_button,hof_button,resume_button,state_button,menu_button,button_shadow,logo;
+texture_jinish road,side_walk,side_walk_2;
 texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
 texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
 texture_jinish gari_left,gari_right,bus_left,bus_right,dotola_bus_left,dotola_bus_right,cng_left,cng_right;
 texture_jinish chips,frooto,coin;
-texture_jinish scorename[10],score[10],currentscore,scoresave_text,scoresave_name;
+texture_jinish scorename[10],score[10],currentscore,currentscore_backdrop,scoresave_text,scoresave_name;
 texture_jinish bike_up,bike_down;
-texture_jinish hof_bg;
+texture_jinish hof_bg, pause_screen;
+texture_jinish savestate_dlg;
 timer clock_release,clock_move,snacks,beka,tera;
 bool init();//Initialization
 bool loadMedia();//loads media
@@ -467,8 +479,12 @@ bool loadMedia()
   s = s & logo.loadFromFile("logo.png");
   s = s & road.loadFromFile("road.png");
   s = s & play_button.loadFromFile("play_btn.png");
+  s = s & load_button.loadFromFile("load_btn.png");
   s = s & quit_button.loadFromFile("quit_btn.png");
   s = s & hof_button.loadFromFile("hof_btn.png");
+  s = s & resume_button.loadFromFile("resume_btn.png");
+  s = s & state_button.loadFromFile("savestate_btn.png");
+  s = s & menu_button.loadFromFile("menu_btn.png");
   s = s & button_shadow.loadFromFile("btn_shadow_sprite.png");
   s = s & side_walk.loadFromFile("sidewalk_left.png");
   s = s & side_walk_2.loadFromFile("sidewalk_right.png");
@@ -486,6 +502,8 @@ bool loadMedia()
   s = s & bike_down.loadFromFile("bike2.png");
   s = s & coin.loadFromFile("coinsprites/coinspritesheet.png");
   s = s & hof_bg.loadFromFile("hof_bg.png");
+  s = s & pause_screen.loadFromFile("pause_screen.png");
+  s = s & savestate_dlg.loadFromFile("savestate_dlg.png");
   s = s & gari_left.loadFromFile("car4.png");
   s = s & gari_right.loadFromFile("car3.png");
   s = s & bus_left.loadFromFile("bus4.png");
@@ -494,11 +512,16 @@ bool loadMedia()
   s = s & dotola_bus_right.loadFromFile("dd3.png");
   s = s & cng_left.loadFromFile("cng4.png");
   s = s & cng_right.loadFromFile("cng3.png");
+  s = s & currentscore_backdrop.loadFromFile("currentscore_backdrop.png");
   main_font = TTF_OpenFont("main_font.ttf", 48);
 
   play_button_rect.x = 0;play_button_rect.y = 0;play_button_rect.h = 119;play_button_rect.w = 363;
+  load_button_rect.x = 0;load_button_rect.y = 0;load_button_rect.h = 119;load_button_rect.w = 363;
   quit_button_rect.x = 0;quit_button_rect.y = 0;quit_button_rect.h = 119;quit_button_rect.w = 363;
   hof_button_rect.x = 0;hof_button_rect.y = 0;hof_button_rect.h = 119;hof_button_rect.w = 363;
+  resume_button_rect.x = 0;resume_button_rect.y = 0;resume_button_rect.h = 119;resume_button_rect.w = 363;
+  state_button_rect.x = 0;state_button_rect.y = 0;state_button_rect.h = 119;state_button_rect.w = 363;
+  menu_button_rect.x = 0;menu_button_rect.y = 0;menu_button_rect.h = 119;menu_button_rect.w = 363;
   road_rect.x = 0;road_rect.y = 0;road_rect.h =1440;road_rect.w = 600;
   logo_rect.x = 150;logo_rect.y = 48;logo_rect.h =243-48;logo_rect.w = 488-150;
   side_walk_rect.x =0,side_walk_rect.y=0,side_walk_rect.h=1440,side_walk_rect.w=170;
@@ -507,6 +530,9 @@ bool loadMedia()
   frooto_rect.x = 0,frooto_rect.y = 0,frooto_rect.w = 24,frooto_rect.h = 60;
   currentscore_rect.x = 0,currentscore_rect.y = 0,currentscore_rect.w = 250,currentscore_rect.h = 50;
   hof_bg_rect.x = 0,hof_bg_rect.y = 0,hof_bg_rect.w = 1280,hof_bg_rect.h = 720;
+  pause_screen_rect.x = 0,pause_screen_rect.y = 0,pause_screen_rect.w = 1280,pause_screen_rect.h = 720;
+  savestate_dlg_rect.x = 0,savestate_dlg_rect.y = 0,savestate_dlg_rect.w = 200,savestate_dlg_rect.h = 60;
+  currentscore_backdrop_rect.x = 0,currentscore_backdrop_rect.y = 0,currentscore_backdrop_rect.w = 300,currentscore_backdrop_rect.h = 70;currentscore_backdrop.setAlpha(120);
 
         int hx = 0,hy = 0,inter = 90;
         int hh=110,ww=90;
@@ -590,7 +616,7 @@ bool loadMedia()
 }
 void close()
 {
-  play_button.free();quit_button.free();hof_button.free();button_shadow.free();logo.free();road.free();side_walk.free();side_walk_2.free();
+  play_button.free();load_button.free();quit_button.free();hof_button.free();resume_button.free();state_button.free();menu_button.free();button_shadow.free();logo.free();road.free();side_walk.free();side_walk_2.free();
   gari_up.free();bus_up.free();dotola_bus_up.free();cng_up.free();
   gari_down.free();bus_down.free();dotola_bus_down.free();cng_down.free();
   skeleton.free();
@@ -619,7 +645,7 @@ int main(int argc,char *argv[])
 
       SDL_Event e;
 
-      int ident=0,f=0,p_f=6,q_f=6,h_f=6;
+      int ident=0,f=0,p_f=6,l_f=6,q_f=6,h_f=6,r_f=6,s_f=6,m_f=6;
       int side_walk_y_1 = 0,side_walk_y_2=-1440;
       int side_walk_y_3 = 0,side_walk_y_4 = -1440;
       int character_x = 15,character_y=600;
@@ -644,8 +670,8 @@ int main(int argc,char *argv[])
       bool rerender_text = false;
       bool savenow = false;
       bool game_paused = false;
-      bool loadstate = true;
-      bool write_state_tofile = true;
+      bool loadstate = false;
+      bool write_state_tofile = false;
       int vehicle_variant_selector;
       int snack_variant_selector;
       int snack = 0;
@@ -676,6 +702,8 @@ int main(int argc,char *argv[])
       int fff;
       bool right_permit=1;
       bool left_permit=1;
+
+
 
       int paused_tempscore;
       int paused_side_walk_y_1;
@@ -725,6 +753,20 @@ int main(int argc,char *argv[])
       bool paused_left_permit;
       bool paused_right_permit;
 
+      int nonbool_marker_up[4][8] = {0};
+      int nonbool_marker_down[4][8] = {0};
+      int nonbool_marker_left[4][8] = {0};
+      int nonbool_marker_right[4][8] = {0};
+      int nonbool_marker_snacks[2][16] = {0};
+      int nonbool_marker_coin[16] = {0};
+      int nonbool_bike_up_stat = 0;
+      int nonbool_bike_down_stat = 0;
+      int nonbool_midFrame = 0;
+      int nonbool_topFrame = 1;
+      int nonbool_bottomFrame = 0;
+      int nonbool_right_permit = 1;
+      int nonbool_left_permit = 1;
+
       const Uint8 *state = SDL_GetKeyboardState(NULL);
       while(!quit)
       {
@@ -742,6 +784,16 @@ int main(int argc,char *argv[])
                 tera.start();
                 in_game = true;
               }
+              else if((hover(mx,my,load_button_x,load_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
+              {
+                clock_release.start();
+                clock_move.start();
+                snacks.start();
+                beka.start();
+                tera.start();
+                loadstate = true;
+                in_game = true;
+              }
               else if((hover(mx,my,quit_button_x,quit_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 quit = true;
@@ -749,6 +801,23 @@ int main(int argc,char *argv[])
               else if((hover(mx,my,hof_button_x,hof_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 in_scoreboard = true;
+              }
+              else if((hover(mx,my,resume_button_x,resume_button_y,button_height,button_width)) && in_game && game_paused)
+              {
+                game_paused = false;
+                clock_release.unpause();
+                clock_move.unpause();
+                snacks.unpause();
+                beka.unpause();
+                tera.unpause();
+              }
+              else if((hover(mx,my,state_button_x,state_button_y,button_height,button_width)) && in_game && game_paused)
+              {
+                write_state_tofile = true;
+              }
+              else if((hover(mx,my,menu_button_x,menu_button_y,button_height,button_width)) && in_game && game_paused)
+              {
+                goto begin;
               }
 
             }
@@ -768,9 +837,19 @@ int main(int argc,char *argv[])
               {
                 if (!game_paused) {
                   game_paused = true;
+                  clock_release.pause();
+                  clock_move.pause();
+                  snacks.pause();
+                  beka.pause();
+                  tera.pause();
                 }
                 else {
                   game_paused = false;
+                  clock_release.unpause();
+                  clock_move.unpause();
+                  snacks.unpause();
+                  beka.unpause();
+                  tera.unpause();
                 }
               }
             }
@@ -823,17 +902,23 @@ int main(int argc,char *argv[])
                 fscanf(readstate, "%d", &speed);
                 for (int marker_vehicle_variant_idx = 0; marker_vehicle_variant_idx < 4; marker_vehicle_variant_idx++) {
                   for (int marker_vehicle_queue_idx = 0; marker_vehicle_queue_idx < 8; marker_vehicle_queue_idx++) {
-                    fscanf(readstate, "%d", &marker_up[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
-                    fscanf(readstate, "%d", &marker_down[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
-                    fscanf(readstate, "%d", &marker_left[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
-                    fscanf(readstate, "%d", &marker_right[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
+                    fscanf(readstate, "%d", &nonbool_marker_up[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
+                    fscanf(readstate, "%d", &nonbool_marker_down[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
+                    fscanf(readstate, "%d", &nonbool_marker_left[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
+                    fscanf(readstate, "%d", &nonbool_marker_right[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
+                    marker_up[marker_vehicle_variant_idx][marker_vehicle_queue_idx] = nonbool_marker_up[marker_vehicle_variant_idx][marker_vehicle_queue_idx];
+                    marker_down[marker_vehicle_variant_idx][marker_vehicle_queue_idx] = nonbool_marker_down[marker_vehicle_variant_idx][marker_vehicle_queue_idx];
+                    marker_left[marker_vehicle_variant_idx][marker_vehicle_queue_idx] = nonbool_marker_left[marker_vehicle_variant_idx][marker_vehicle_queue_idx];
+                    marker_right[marker_vehicle_variant_idx][marker_vehicle_queue_idx] = nonbool_marker_right[marker_vehicle_variant_idx][marker_vehicle_queue_idx];
                   }
                 }
                 for (int marker_consumable_idx = 0; marker_consumable_idx < 16; marker_consumable_idx++) {
                   for (int marker_snack_variant = 0; marker_snack_variant < 2; marker_snack_variant++) {
-                    fscanf(readstate, "%d", &marker_snacks[marker_snack_variant][marker_consumable_idx]);
+                    fscanf(readstate, "%d", &nonbool_marker_snacks[marker_snack_variant][marker_consumable_idx]);
+                    marker_snacks[marker_snack_variant][marker_consumable_idx] = nonbool_marker_snacks[marker_snack_variant][marker_consumable_idx];
                   }
-                  fscanf(readstate, "%d", &marker_coin[marker_consumable_idx]);
+                  fscanf(readstate, "%d", &nonbool_marker_coin[marker_consumable_idx]);
+                  marker_coin[marker_consumable_idx] = nonbool_marker_coin[marker_consumable_idx];
                 }
                 fscanf(readstate, "%d", &vehicle_variant_selector);
                 fscanf(readstate, "%d", &snack_variant_selector);
@@ -843,13 +928,13 @@ int main(int argc,char *argv[])
                 fscanf(readstate, "%d", &car_down);
                 fscanf(readstate, "%d", &car_left);
                 fscanf(readstate, "%d", &car_right);
-                fscanf(readstate, "%d", &midFrame);
-                fscanf(readstate, "%d", &topFrame);
-                fscanf(readstate, "%d", &bottomFrame);
+                fscanf(readstate, "%d", &nonbool_midFrame);
+                fscanf(readstate, "%d", &nonbool_topFrame);
+                fscanf(readstate, "%d", &nonbool_bottomFrame);
                 fscanf(readstate, "%d", &stamina);
                 fscanf(readstate, "%d", &stamina_blow);
-                fscanf(readstate, "%d", &bike_up_stat);
-                fscanf(readstate, "%d", &bike_down_stat);
+                fscanf(readstate, "%d", &nonbool_bike_up_stat);
+                fscanf(readstate, "%d", &nonbool_bike_down_stat);
                 fscanf(readstate, "%d", &ypos_bike_up);
                 fscanf(readstate, "%d", &ypos_bike_down);
                 for (int xypos_vehicle_idx = 0; xypos_vehicle_idx < 8; xypos_vehicle_idx++) {
@@ -868,8 +953,16 @@ int main(int argc,char *argv[])
                   fscanf(readstate, "%d", &xpos_coin[xypos_consumable_idx]);
                   fscanf(readstate, "%d", &ypos_coin[xypos_consumable_idx]);
                 }
-                fscanf(readstate, "%d", &left_permit);
-                fscanf(readstate, "%d", &right_permit);
+                fscanf(readstate, "%d", &nonbool_left_permit);
+                fscanf(readstate, "%d", &nonbool_right_permit);
+
+                bike_up_stat = nonbool_bike_up_stat;
+                bike_down_stat = nonbool_bike_down_stat;
+                midFrame = nonbool_midFrame;
+                topFrame = nonbool_topFrame;
+                bottomFrame = nonbool_bottomFrame;
+                right_permit = nonbool_right_permit;
+                left_permit = nonbool_left_permit;
               }
               else {
                 printf("No savestate found\n");
@@ -1394,16 +1487,18 @@ int main(int argc,char *argv[])
           if(side_walk_y_2 >= 1440)side_walk_y_2=-1440;
           if(side_walk_y_3 >= 1440)side_walk_y_3=-1440;
           if(side_walk_y_4 >= 1440)side_walk_y_4=-1440;
-        }
+
           road.render(road_x,road_y_1,&road_rect);
           road.render(road_x,road_y_2,&road_rect);//two road tiling one after another creating an illusion of continuity
           side_walk.render(road_x-170,side_walk_y_1,&side_walk_rect);
           side_walk.render(road_x - 170,side_walk_y_2,&side_walk_rect);
           side_walk_2.render(road_x+600,side_walk_y_3,&side_walk_rect_2);
           side_walk_2.render(road_x+600,side_walk_y_4,&side_walk_rect_2);
+          currentscore_backdrop.render(869, 97, &currentscore_backdrop_rect);
           currentscore.RasteriseText(tempscore_string);
           currentscore_rect.w = currentscore.getW();
           currentscore.render(900, 100, &currentscore_rect);
+
           if(character_x < 0)character_x = 0;
           if(character_x > 1280)character_x = 1280;
           if(character_y < 0)character_y = 0;
@@ -1458,8 +1553,8 @@ int main(int argc,char *argv[])
             SDL_RenderFillRect( main_renderer, &stam );
             SDL_RenderPresent(main_renderer);
           }
-          if(!game_paused)
-          {
+          /*if(!game_paused)
+          {*/
           if(state[SDL_SCANCODE_UP] ||state[SDL_SCANCODE_LEFT]||state[SDL_SCANCODE_RIGHT]||state[SDL_SCANCODE_DOWN])//if we're playing the game, then these conditions apply
           {
             if(state[SDL_SCANCODE_UP] )
@@ -1530,6 +1625,7 @@ int main(int argc,char *argv[])
           }
         }
           if (game_paused) {
+
             paused_tempscore = tempscore;
             paused_side_walk_y_1 = side_walk_y_1;
             paused_side_walk_y_2 = side_walk_y_2;
@@ -1592,7 +1688,59 @@ int main(int argc,char *argv[])
             paused_left_permit = left_permit;
             paused_right_permit = right_permit;
 
+            SDL_GetMouseState(&mx,&my);
+            if(hover(mx,my,resume_button_x,resume_button_y,button_height,button_width))
+            {
+              SDL_Delay(50);
+              r_f--;//if we hover over play button then run frames for play animation
+              if(r_f< 0)r_f = 0;
+              m_f++;
+              s_f++;
+              if(m_f >= 6)m_f = 6;
+              if(s_f >= 6)s_f = 6;
+            }
+            else if(hover(mx,my,menu_button_x,menu_button_y,button_height,button_width))
+            {
+              SDL_Delay(50);
+              m_f--;//if we hover over quit button then run frames for quit animation
+              if(m_f < 0)m_f = 0;
+              r_f++;
+              s_f++;
+              if(r_f >= 6)r_f=6;
+              if(s_f >= 6)s_f=6;
+            }
+            else if(hover(mx,my,state_button_x,state_button_y,button_height,button_width))
+            {
+              SDL_Delay(50);
+              s_f--;//if we hover over quit button then run frames for quit animation
+              if(s_f < 0)s_f = 0;
+              r_f++;
+              m_f++;
+              if(r_f >= 6)r_f=6;
+              if(m_f >= 6)m_f=6;
+            }
+            else
+            {
+              r_f++;//we want to increment both frames to the last to bring animation of button to ground state
+              m_f++;
+              s_f++;
+              SDL_Delay(50);
+              if(r_f>= 6)r_f = 6;
+              if(m_f >= 6)m_f = 6;
+              if(s_f >= 6)s_f=6;
+            }
+
+            pause_screen.render(0, 0, &pause_screen_rect);
+            button_shadow.render(resume_button_x,resume_button_y,button_shadow_array+r_f);
+            resume_button.render(resume_button_x, resume_button_y, &resume_button_rect);
+            button_shadow.render(state_button_x,state_button_y,button_shadow_array+s_f);
+            state_button.render(state_button_x, state_button_y, &state_button_rect);
+            button_shadow.render(menu_button_x,menu_button_y,button_shadow_array+m_f);
+            menu_button.render(menu_button_x, menu_button_y, &menu_button_rect);
+            SDL_RenderPresent(main_renderer);
+
             if (write_state_tofile) {
+
               FILE *writestate = fopen("savedata/state.sav", "w");
 
               fprintf(writestate, "%d\n", paused_tempscore);
@@ -1657,12 +1805,19 @@ int main(int argc,char *argv[])
               fprintf(writestate, "%d\n", paused_right_permit);
 
               fclose(writestate);
-            }
 
-            printf("Saved state\n");
-            game_paused = false;
-            loadstate = true;
-            in_game = false;
+              /*for (int savestate_dlg_alpha_modulator = 255; savestate_dlg_alpha_modulator >= 0; savestate_dlg_alpha_modulator -= 32) {
+                SDL_Delay(1000);
+                printf("%u\n", savestate_dlg_alpha_modulator);
+                savestate_dlg.setAlpha(savestate_dlg_alpha_modulator);
+                savestate_dlg.render(1000, 100, &savestate_dlg_rect);
+                SDL_RenderPresent(main_renderer);
+              }*/
+
+              savestate_dlg.render(1000, 100, &savestate_dlg_rect);
+              SDL_RenderPresent(main_renderer);
+              write_state_tofile = false;
+            }
 
           }
           SDL_Delay(10);
@@ -1753,10 +1908,24 @@ int main(int argc,char *argv[])
             SDL_Delay(50);
             p_f--;//if we hover over play button then run frames for play animation
             if(p_f< 0)p_f = 0;
+            l_f++;
             q_f++;
             h_f++;
+            if(l_f >= 6)l_f = 6;
             if(q_f >= 6)q_f = 6;
             if(h_f >= 6)h_f = 6;
+          }
+          else if(hover(mx,my,load_button_x,load_button_y,button_height,button_width))
+          {
+            SDL_Delay(50);
+            l_f--;//if we hover over play button then run frames for play animation
+            if(l_f< 0)l_f = 0;
+            p_f++;
+            h_f++;
+            q_f++;
+            if(p_f >= 6)p_f = 6;
+            if(h_f >= 6)h_f = 6;
+            if(q_f >= 6)q_f = 6;
           }
           else if(hover(mx,my,quit_button_x,quit_button_y,button_height,button_width))
           {
@@ -1764,8 +1933,10 @@ int main(int argc,char *argv[])
             q_f--;//if we hover over quit button then run frames for quit animation
             if(q_f < 0)q_f = 0;
             p_f++;
+            l_f++;
             h_f++;
             if(p_f >= 6)p_f=6;
+            if(l_f >= 6)l_f = 6;
             if(h_f >= 6)h_f=6;
           }
           else if(hover(mx,my,hof_button_x,hof_button_y,button_height,button_width))
@@ -1773,20 +1944,24 @@ int main(int argc,char *argv[])
             SDL_Delay(50);
             h_f--;//if we hover over quit button then run frames for quit animation
             if(h_f < 0)h_f = 0;
+            l_f++;
             p_f++;
             q_f++;
             if(p_f >= 6)p_f=6;
+            if(l_f >= 6)l_f = 6;
             if(q_f >= 6)q_f=6;
           }
           else
           {
             p_f++;//we want to increment both frames to the last to bring animation of button to ground state
+            l_f++;
             q_f++;
             h_f++;
             SDL_Delay(50);
             if(p_f>= 6)p_f = 6;
+            if(l_f >= 6)l_f = 6;
             if(q_f >= 6)q_f = 6;
-            if(h_f >= 6)h_f=6;
+            if(h_f >= 6)h_f = 6;
           }
           //This is the menu windown
           SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
@@ -1795,6 +1970,8 @@ int main(int argc,char *argv[])
           quit_button.render(quit_button_x,quit_button_y,&quit_button_rect);//quit button render
           button_shadow.render(play_button_x,play_button_y,button_shadow_array+p_f);
           play_button.render(play_button_x,play_button_y,&play_button_rect);//play button render
+          button_shadow.render(load_button_x,load_button_y,button_shadow_array+l_f);
+          load_button.render(load_button_x,load_button_y,&load_button_rect);
           button_shadow.render(hof_button_x,hof_button_y,button_shadow_array+h_f);
           hof_button.render(hof_button_x,hof_button_y,&hof_button_rect);
           logo.render(470,100,&logo_rect);//logo render
