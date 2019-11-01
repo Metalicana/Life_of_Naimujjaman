@@ -26,6 +26,7 @@ const int play_button_x = 275,play_button_y = 400;
 const int load_button_x = 275,load_button_y = 500;
 const int quit_button_x = 625,quit_button_y = 500;
 const int hof_button_x = 625,hof_button_y = 400;
+const int back_circ_button_x = 100,back_circ_button_y = 50;
 const int resume_button_x = 450, resume_button_y = 300;
 const int state_button_x = 450, state_button_y = 400;
 const int menu_button_x = 450, menu_button_y = 500;
@@ -58,6 +59,7 @@ SDL_Rect play_button_rect;
 SDL_Rect load_button_rect;
 SDL_Rect quit_button_rect;
 SDL_Rect hof_button_rect;
+SDL_Rect back_circ_button_rect;
 SDL_Rect resume_button_rect;
 SDL_Rect state_button_rect;
 SDL_Rect menu_button_rect;
@@ -120,7 +122,7 @@ private:
   bool mPaused,mStarted;
 };
 
-texture_jinish skeleton,play_button,load_button,quit_button,hof_button,resume_button,state_button,menu_button,button_shadow,logo;
+texture_jinish skeleton,play_button,load_button,quit_button,hof_button,back_circ_button,resume_button,state_button,menu_button,button_shadow,logo;
 texture_jinish road,side_walk,side_walk_2;
 texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
 texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
@@ -497,6 +499,7 @@ bool loadMedia()
   s = s & load_button.loadFromFile("load_btn.png");
   s = s & quit_button.loadFromFile("quit_btn.png");
   s = s & hof_button.loadFromFile("hof_btn.png");
+  s = s & back_circ_button.loadFromFile("back_circ_btn.png");
   s = s & resume_button.loadFromFile("resume_btn.png");
   s = s & state_button.loadFromFile("savestate_btn.png");
   s = s & menu_button.loadFromFile("menu_btn.png");
@@ -534,6 +537,7 @@ bool loadMedia()
   load_button_rect.x = 0;load_button_rect.y = 0;load_button_rect.h = 119;load_button_rect.w = 363;
   quit_button_rect.x = 0;quit_button_rect.y = 0;quit_button_rect.h = 119;quit_button_rect.w = 363;
   hof_button_rect.x = 0;hof_button_rect.y = 0;hof_button_rect.h = 119;hof_button_rect.w = 363;
+  back_circ_button_rect.x = 0;back_circ_button_rect.y = 0;back_circ_button_rect.w = 50;back_circ_button_rect.h = 50;
   resume_button_rect.x = 0;resume_button_rect.y = 0;resume_button_rect.h = 119;resume_button_rect.w = 363;
   state_button_rect.x = 0;state_button_rect.y = 0;state_button_rect.h = 119;state_button_rect.w = 363;
   menu_button_rect.x = 0;menu_button_rect.y = 0;menu_button_rect.h = 119;menu_button_rect.w = 363;
@@ -631,7 +635,7 @@ bool loadMedia()
 }
 void close()
 {
-  play_button.free();load_button.free();quit_button.free();hof_button.free();resume_button.free();state_button.free();menu_button.free();button_shadow.free();logo.free();road.free();side_walk.free();side_walk_2.free();
+  play_button.free();load_button.free();quit_button.free();hof_button.free();back_circ_button.free();resume_button.free();state_button.free();menu_button.free();button_shadow.free();logo.free();road.free();side_walk.free();side_walk_2.free();
   gari_up.free();bus_up.free();dotola_bus_up.free();cng_up.free();
   gari_down.free();bus_down.free();dotola_bus_down.free();cng_down.free();
   skeleton.free();
@@ -819,6 +823,10 @@ int main(int argc,char *argv[])
               else if((hover(mx,my,hof_button_x,hof_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 in_scoreboard = true;
+              }
+              else if((hover(mx,my,back_circ_button_x,back_circ_button_y,50,50)) && in_scoreboard)
+              {
+                in_scoreboard = false;
               }
               else if((hover(mx,my,resume_button_x,resume_button_y,button_height,button_width)) && in_game && game_paused)
               {
@@ -1873,6 +1881,7 @@ int main(int argc,char *argv[])
           SDL_RenderClear( main_renderer );
 
           hof_bg.render(0, 0, &hof_bg_rect);
+          back_circ_button.render(back_circ_button_x, back_circ_button_y, &back_circ_button_rect);
 
           if (!scores_open)
           {
