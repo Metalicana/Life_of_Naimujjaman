@@ -111,6 +111,7 @@ public:
   void pause();
   void unpause();
   Uint32 getTicks();
+  void setTicks(Uint32 savedTicks);
   bool is_started();
   bool is_paused();
 private:
@@ -279,6 +280,20 @@ Uint32 timer::getTicks()
     }
   }
   return time;
+}
+void timer::setTicks(Uint32 savedTicks)
+{
+  if (mStarted)
+  {
+    if(mPaused)
+    {
+      mPausedTicks = savedTicks;
+    }
+    else
+    {
+      mStartTicks = SDL_GetTicks() - savedTicks;
+    }
+  }
 }
 
 bool timer::is_started()
@@ -703,8 +718,11 @@ int main(int argc,char *argv[])
       bool right_permit=1;
       bool left_permit=1;
 
-
-
+      Uint32 paused_clock_release_ticks;
+      Uint32 paused_clock_move_ticks;
+      Uint32 paused_snacks_ticks;
+      Uint32 paused_beka_ticks;
+      Uint32 paused_tera_ticks;
       int paused_tempscore;
       int paused_side_walk_y_1;
       int paused_side_walk_y_2;
@@ -817,6 +835,11 @@ int main(int argc,char *argv[])
               }
               else if((hover(mx,my,menu_button_x,menu_button_y,button_height,button_width)) && in_game && game_paused)
               {
+                clock_release.stop();
+                clock_move.stop();
+                snacks.stop();
+                beka.stop();
+                tera.stop();
                 goto begin;
               }
 
@@ -888,6 +911,16 @@ int main(int argc,char *argv[])
               loadstate = false;
               FILE *readstate = fopen("savedata/state.sav", "r");
               if (readstate != NULL) {
+                fscanf(readstate, "%u", &paused_clock_release_ticks);
+                fscanf(readstate, "%u", &paused_clock_move_ticks);
+                fscanf(readstate, "%u", &paused_snacks_ticks);
+                fscanf(readstate, "%u", &paused_beka_ticks);
+                fscanf(readstate, "%u", &paused_tera_ticks);
+                clock_release.setTicks(paused_clock_release_ticks);
+                clock_move.setTicks(paused_clock_move_ticks);
+                snacks.setTicks(paused_snacks_ticks);
+                beka.setTicks(paused_beka_ticks);
+                tera.setTicks(paused_tera_ticks);
                 fscanf(readstate, "%d", &tempscore);
                 padded_itoa(tempscore, tempscore_string);
                 fscanf(readstate, "%d", &side_walk_y_1);
@@ -1626,6 +1659,11 @@ int main(int argc,char *argv[])
         }
           if (game_paused) {
 
+            paused_clock_release_ticks = clock_release.getTicks();
+            paused_clock_move_ticks = clock_move.getTicks();
+            paused_snacks_ticks = snacks.getTicks();
+            paused_beka_ticks = beka.getTicks();
+            paused_tera_ticks = tera.getTicks();
             paused_tempscore = tempscore;
             paused_side_walk_y_1 = side_walk_y_1;
             paused_side_walk_y_2 = side_walk_y_2;
@@ -1743,6 +1781,11 @@ int main(int argc,char *argv[])
 
               FILE *writestate = fopen("savedata/state.sav", "w");
 
+              fprintf(writestate, "%u\n", paused_clock_release_ticks);
+              fprintf(writestate, "%u\n", paused_clock_move_ticks);
+              fprintf(writestate, "%u\n", paused_snacks_ticks);
+              fprintf(writestate, "%u\n", paused_beka_ticks);
+              fprintf(writestate, "%u\n", paused_tera_ticks);
               fprintf(writestate, "%d\n", paused_tempscore);
               fprintf(writestate, "%d\n", paused_side_walk_y_1);
               fprintf(writestate, "%d\n", paused_side_walk_y_2);
