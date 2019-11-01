@@ -843,7 +843,9 @@ int main(int argc,char *argv[])
                 fscanf(readstate, "%d", &car_down);
                 fscanf(readstate, "%d", &car_left);
                 fscanf(readstate, "%d", &car_right);
-                fscanf(readstate, "%d", &midFrame, topFrame, bottomFrame);
+                fscanf(readstate, "%d", &midFrame);
+                fscanf(readstate, "%d", &topFrame);
+                fscanf(readstate, "%d", &bottomFrame);
                 fscanf(readstate, "%d", &stamina);
                 fscanf(readstate, "%d", &stamina_blow);
                 fscanf(readstate, "%d", &bike_up_stat);
@@ -1626,7 +1628,9 @@ int main(int argc,char *argv[])
               fprintf(writestate, "%d\n", paused_car_down);
               fprintf(writestate, "%d\n", paused_car_left);
               fprintf(writestate, "%d\n", paused_car_right);
-              fprintf(writestate, "%d\n", paused_midFrame, paused_topFrame, paused_bottomFrame);
+              fprintf(writestate, "%d\n", paused_midFrame);
+              fprintf(writestate, "%d\n", paused_topFrame);
+              fprintf(writestate, "%d\n", paused_bottomFrame);
               fprintf(writestate, "%d\n", paused_stamina);
               fprintf(writestate, "%d\n", paused_stamina_blow);
               fprintf(writestate, "%d\n", paused_bike_up_stat);
