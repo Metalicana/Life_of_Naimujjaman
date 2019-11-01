@@ -325,7 +325,7 @@ void updatescore (int tempscore, char tempname[])
 
   for (k = (totalscorenum - 1); k >= 0; k--) {
     if (tempscore == updatescore_int_array[k]) {
-      for (l = totalscorenum - 2; l >= k; l--) {
+      for (l = totalscorenum - 2; l > k; l--) {
         strcpy(updatescorename_array[l + 1], updatescorename_array[l]);
       }
       strcpy(updatescorename_array[k], tempname);
@@ -644,7 +644,8 @@ int main(int argc,char *argv[])
       bool rerender_text = false;
       bool savenow = false;
       bool game_paused = false;
-      bool loadstate = false;
+      bool loadstate = true;
+      bool write_state_tofile = true;
       int vehicle_variant_selector;
       int snack_variant_selector;
       int snack = 0;
@@ -676,6 +677,7 @@ int main(int argc,char *argv[])
       bool right_permit=1;
       bool left_permit=1;
 
+      int paused_tempscore;
       int paused_side_walk_y_1;
       int paused_side_walk_y_2;
       int paused_side_walk_y_3;
@@ -686,10 +688,12 @@ int main(int argc,char *argv[])
       int paused_road_y_1;
       int paused_road_y_2;
       int paused_speed;
-      bool paused_marker_up[4][8];
-      bool paused_marker_down[4][8];
-      bool paused_marker_left[4][8];
-      bool paused_marker_right[4][8];
+      bool paused_marker_up[4][8] = {0};
+      bool paused_marker_down[4][8] = {0};
+      bool paused_marker_left[4][8] = {0};
+      bool paused_marker_right[4][8] = {0};
+      bool paused_marker_snacks[2][16] = {0};
+      bool paused_marker_coin[16] = {0};
       int paused_vehicle_variant_selector;
       int paused_snack_variant_selector;
       int paused_snack;
@@ -705,18 +709,18 @@ int main(int argc,char *argv[])
       bool paused_bike_down_stat;
       int paused_ypos_bike_up;
       int paused_ypos_bike_down;
-      int paused_xpos_up[8];
-      int paused_xpos_down[8];
-      int paused_xpos_left[8];
-      int paused_xpos_right[8];
-      int paused_ypos_up[8];
-      int paused_ypos_down[8];
+      int paused_xpos_up[8] = {0};
+      int paused_xpos_down[8] = {0};
+      int paused_xpos_left[8] = {0};
+      int paused_xpos_right[8] = {0};
+      int paused_ypos_up[8] = {0};
+      int paused_ypos_down[8] = {0};
       int paused_y_left;
       int paused_y_right;
-      int paused_xpos_snack[16];
-      int paused_ypos_snack[16];
-      int paused_xpos_coin[16];
-      int paused_ypos_coin[16];
+      int paused_xpos_snack[16] = {0};
+      int paused_ypos_snack[16] = {0};
+      int paused_xpos_coin[16] = {0};
+      int paused_ypos_coin[16] = {0};
       //int paused_fff;
       bool paused_left_permit;
       bool paused_right_permit;
@@ -803,60 +807,73 @@ int main(int argc,char *argv[])
          {
            if (loadstate) {
               loadstate = false;
-              side_walk_y_1 = paused_side_walk_y_1;
-              side_walk_y_2 = paused_side_walk_y_2;
-              side_walk_y_3 = paused_side_walk_y_3;
-              side_walk_y_4 = paused_side_walk_y_4;
-              character_x = paused_character_x;
-              character_y = paused_character_y;
-              road_x = paused_road_x;
-              road_y_1 = paused_road_y_1;
-              road_y_2 = paused_road_y_2;
-              speed = paused_speed;
-              for (int paused_marker_vehicle_variant_idx = 0; paused_marker_vehicle_variant_idx < 4; paused_marker_vehicle_variant_idx++) {
-                for (int paused_marker_vehicle_queue_idx = 0; paused_marker_vehicle_queue_idx < 8; paused_marker_vehicle_queue_idx++) {
-                  marker_up[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = paused_marker_up[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
-                  marker_down[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = paused_marker_down[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
-                  marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = paused_marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
-                  marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = paused_marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
+              FILE *readstate = fopen("savedata/state.sav", "r");
+              if (readstate != NULL) {
+                fscanf(readstate, "%d", &tempscore);
+                padded_itoa(tempscore, tempscore_string);
+                fscanf(readstate, "%d", &side_walk_y_1);
+                fscanf(readstate, "%d", &side_walk_y_2);
+                fscanf(readstate, "%d", &side_walk_y_3);
+                fscanf(readstate, "%d", &side_walk_y_4);
+                fscanf(readstate, "%d", &character_x);
+                fscanf(readstate, "%d", &character_y);
+                fscanf(readstate, "%d", &road_x);
+                fscanf(readstate, "%d", &road_y_1);
+                fscanf(readstate, "%d", &road_y_2);
+                fscanf(readstate, "%d", &speed);
+                for (int marker_vehicle_variant_idx = 0; marker_vehicle_variant_idx < 4; marker_vehicle_variant_idx++) {
+                  for (int marker_vehicle_queue_idx = 0; marker_vehicle_queue_idx < 8; marker_vehicle_queue_idx++) {
+                    fscanf(readstate, "%d", &marker_up[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
+                    fscanf(readstate, "%d", &marker_down[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
+                    fscanf(readstate, "%d", &marker_left[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
+                    fscanf(readstate, "%d", &marker_right[marker_vehicle_variant_idx][marker_vehicle_queue_idx]);
+                  }
                 }
+                for (int marker_consumable_idx = 0; marker_consumable_idx < 16; marker_consumable_idx++) {
+                  for (int marker_snack_variant = 0; marker_snack_variant < 2; marker_snack_variant++) {
+                    fscanf(readstate, "%d", &marker_snacks[marker_snack_variant][marker_consumable_idx]);
+                  }
+                  fscanf(readstate, "%d", &marker_coin[marker_consumable_idx]);
+                }
+                fscanf(readstate, "%d", &vehicle_variant_selector);
+                fscanf(readstate, "%d", &snack_variant_selector);
+                fscanf(readstate, "%d", &snack);
+                fscanf(readstate, "%d", &coins);
+                fscanf(readstate, "%d", &car_up);
+                fscanf(readstate, "%d", &car_down);
+                fscanf(readstate, "%d", &car_left);
+                fscanf(readstate, "%d", &car_right);
+                fscanf(readstate, "%d", &midFrame, topFrame, bottomFrame);
+                fscanf(readstate, "%d", &stamina);
+                fscanf(readstate, "%d", &stamina_blow);
+                fscanf(readstate, "%d", &bike_up_stat);
+                fscanf(readstate, "%d", &bike_down_stat);
+                fscanf(readstate, "%d", &ypos_bike_up);
+                fscanf(readstate, "%d", &ypos_bike_down);
+                for (int xypos_vehicle_idx = 0; xypos_vehicle_idx < 8; xypos_vehicle_idx++) {
+                  fscanf(readstate, "%d", &xpos_up[xypos_vehicle_idx]);
+                  fscanf(readstate, "%d", &xpos_down[xypos_vehicle_idx]);
+                  fscanf(readstate, "%d", &xpos_left[xypos_vehicle_idx]);
+                  fscanf(readstate, "%d", &xpos_right[xypos_vehicle_idx]);
+                  fscanf(readstate, "%d", &ypos_up[xypos_vehicle_idx]);
+                  fscanf(readstate, "%d", &ypos_down[xypos_vehicle_idx]);
+                }
+                fscanf(readstate, "%d", &y_left);
+                fscanf(readstate, "%d", &y_right);
+                for (int xypos_consumable_idx = 0; xypos_consumable_idx < 16; xypos_consumable_idx++) {
+                  fscanf(readstate, "%d", &xpos_snack[xypos_consumable_idx]);
+                  fscanf(readstate, "%d", &ypos_snack[xypos_consumable_idx]);
+                  fscanf(readstate, "%d", &xpos_coin[xypos_consumable_idx]);
+                  fscanf(readstate, "%d", &ypos_coin[xypos_consumable_idx]);
+                }
+                fscanf(readstate, "%d", &left_permit);
+                fscanf(readstate, "%d", &right_permit);
               }
-              vehicle_variant_selector = paused_vehicle_variant_selector;
-              snack_variant_selector = paused_snack_variant_selector;
-              snack = paused_snack;
-              coins = paused_coins;
-              car_up = paused_car_up;
-              car_down = paused_car_down;
-              car_left = paused_car_left;
-              car_right = paused_car_right;
-              midFrame = paused_midFrame;
-              topFrame = paused_topFrame;
-              bottomFrame = paused_bottomFrame;
-              stamina = paused_stamina;
-              stamina_blow = paused_stamina_blow;
-              bike_up_stat = paused_bike_up_stat;
-              bike_down_stat = paused_bike_down_stat;
-              ypos_bike_up = paused_ypos_bike_up;
-              ypos_bike_down = paused_ypos_bike_down;
-              for (int paused_xypos_vehicle_idx = 0; paused_xypos_vehicle_idx < 8; paused_xypos_vehicle_idx++) {
-                xpos_up[paused_xypos_vehicle_idx] = paused_xpos_up[paused_xypos_vehicle_idx];
-                xpos_down[paused_xypos_vehicle_idx] = paused_xpos_down[paused_xypos_vehicle_idx];
-                ypos_up[paused_xypos_vehicle_idx] = paused_ypos_up[paused_xypos_vehicle_idx];
-                ypos_down[paused_xypos_vehicle_idx] = paused_ypos_down[paused_xypos_vehicle_idx];
-                xpos_left[paused_xypos_vehicle_idx] = paused_xpos_left[paused_xypos_vehicle_idx];
-                xpos_right[paused_xypos_vehicle_idx] = paused_xpos_right[paused_xypos_vehicle_idx];
+              else {
+                printf("No savestate found\n");
               }
-              y_left = paused_y_left;
-              y_right = paused_y_right;
-              for (int paused_xypos_consumable_idx = 0; paused_xypos_consumable_idx < 16; paused_xypos_consumable_idx++) {
-                xpos_snack[paused_xypos_consumable_idx] = paused_xpos_snack[paused_xypos_consumable_idx];
-                ypos_snack[paused_xypos_consumable_idx] = paused_ypos_snack[paused_xypos_consumable_idx];
-                xpos_coin[paused_xypos_consumable_idx] = paused_xpos_coin[paused_xypos_consumable_idx];
-                ypos_coin[paused_xypos_consumable_idx] = paused_ypos_coin[paused_xypos_consumable_idx];
-              }
-              //fff = paused_fff;
-              left_permit = paused_left_permit;
-              right_permit = paused_right_permit;
+
+              fclose(readstate);
            }
          fff = std::max(road_y_1,road_y_2);
          if(topFrame)
@@ -1103,7 +1120,7 @@ int main(int argc,char *argv[])
 
            if(is_colliding(character_x,character_y,xpos_up[w],ypos_up[w],h1,w1) || is_colliding(character_x,character_y,xpos_down[w],ypos_down[w],h2,w2))
            {
-             character_x=100;
+             character_x=600;
              stamina-=stamina_blow;
              //SDL_Delay(50);
            }
@@ -1164,7 +1181,7 @@ int main(int argc,char *argv[])
            }
            if(is_colliding(character_x,character_y,xpos_right[w],y_right,h1,w1) || is_colliding(character_x,character_y,xpos_left[w],y_left,h2,w2))
            {
-             character_x=100;
+             character_x=600;
              stamina-=stamina_blow;
              //SDL_Delay(50);
            }
@@ -1173,7 +1190,7 @@ int main(int argc,char *argv[])
          {
            if(is_colliding(character_x,character_y,xpos_bike,ypos_bike_up,bike_height,bike_width))
            {
-             character_x = 100;
+             character_x = 600;
              stamina -= 3*stamina_blow;
            }
          }
@@ -1181,7 +1198,7 @@ int main(int argc,char *argv[])
          {
            if(is_colliding(character_x,character_y,xpos_bike,ypos_bike_down,bike_height,bike_width))
            {
-             character_x = 100;
+             character_x = 600;
              stamina -= 3*stamina_blow;
            }
          }
@@ -1511,6 +1528,7 @@ int main(int argc,char *argv[])
           }
         }
           if (game_paused) {
+            paused_tempscore = tempscore;
             paused_side_walk_y_1 = side_walk_y_1;
             paused_side_walk_y_2 = side_walk_y_2;
             paused_side_walk_y_3 = side_walk_y_3;
@@ -1528,6 +1546,12 @@ int main(int argc,char *argv[])
                 paused_marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
                 paused_marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx] = marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx];
               }
+            }
+            for (int paused_marker_consumable_idx = 0; paused_marker_consumable_idx < 16; paused_marker_consumable_idx++) {
+              for (int paused_marker_snack_variant = 0; paused_marker_snack_variant < 2; paused_marker_snack_variant++) {
+                paused_marker_snacks[paused_marker_snack_variant][paused_marker_consumable_idx] = marker_snacks[paused_marker_snack_variant][paused_marker_consumable_idx];
+              }
+              paused_marker_coin[paused_marker_consumable_idx] = marker_coin[paused_marker_consumable_idx];
             }
             paused_vehicle_variant_selector = vehicle_variant_selector;
             paused_snack_variant_selector = snack_variant_selector;
@@ -1549,10 +1573,10 @@ int main(int argc,char *argv[])
             for (int paused_xypos_vehicle_idx = 0; paused_xypos_vehicle_idx < 8; paused_xypos_vehicle_idx++) {
               paused_xpos_up[paused_xypos_vehicle_idx] = xpos_up[paused_xypos_vehicle_idx];
               paused_xpos_down[paused_xypos_vehicle_idx] = xpos_down[paused_xypos_vehicle_idx];
-              paused_ypos_up[paused_xypos_vehicle_idx] = ypos_up[paused_xypos_vehicle_idx];
-              paused_ypos_down[paused_xypos_vehicle_idx] = ypos_down[paused_xypos_vehicle_idx];
               paused_xpos_left[paused_xypos_vehicle_idx] = xpos_left[paused_xypos_vehicle_idx];
               paused_xpos_right[paused_xypos_vehicle_idx] = xpos_right[paused_xypos_vehicle_idx];
+              paused_ypos_up[paused_xypos_vehicle_idx] = ypos_up[paused_xypos_vehicle_idx];
+              paused_ypos_down[paused_xypos_vehicle_idx] = ypos_down[paused_xypos_vehicle_idx];
             }
             paused_y_left = y_left;
             paused_y_right = y_right;
@@ -1565,6 +1589,71 @@ int main(int argc,char *argv[])
             //paused_fff = fff;
             paused_left_permit = left_permit;
             paused_right_permit = right_permit;
+
+            if (write_state_tofile) {
+              FILE *writestate = fopen("savedata/state.sav", "w");
+
+              fprintf(writestate, "%d\n", paused_tempscore);
+              fprintf(writestate, "%d\n", paused_side_walk_y_1);
+              fprintf(writestate, "%d\n", paused_side_walk_y_2);
+              fprintf(writestate, "%d\n", paused_side_walk_y_3);
+              fprintf(writestate, "%d\n", paused_side_walk_y_4);
+              fprintf(writestate, "%d\n", paused_character_x);
+              fprintf(writestate, "%d\n", paused_character_y);
+              fprintf(writestate, "%d\n", paused_road_x);
+              fprintf(writestate, "%d\n", paused_road_y_1);
+              fprintf(writestate, "%d\n", paused_road_y_2);
+              fprintf(writestate, "%d\n", paused_speed);
+              for (int paused_marker_vehicle_variant_idx = 0; paused_marker_vehicle_variant_idx < 4; paused_marker_vehicle_variant_idx++) {
+                for (int paused_marker_vehicle_queue_idx = 0; paused_marker_vehicle_queue_idx < 8; paused_marker_vehicle_queue_idx++) {
+                  fprintf(writestate, "%d\n", paused_marker_up[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
+                  fprintf(writestate, "%d\n", paused_marker_down[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
+                  fprintf(writestate, "%d\n", paused_marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
+                  fprintf(writestate, "%d\n", paused_marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
+                }
+              }
+              for (int paused_marker_consumable_idx = 0; paused_marker_consumable_idx < 16; paused_marker_consumable_idx++) {
+                for (int paused_marker_snack_variant = 0; paused_marker_snack_variant < 2; paused_marker_snack_variant++) {
+                  fprintf(writestate, "%d\n", paused_marker_snacks[paused_marker_snack_variant][paused_marker_consumable_idx]);
+                }
+                fprintf(writestate, "%d\n", paused_marker_coin[paused_marker_consumable_idx]);
+              }
+              fprintf(writestate, "%d\n", paused_vehicle_variant_selector);
+              fprintf(writestate, "%d\n", paused_snack_variant_selector);
+              fprintf(writestate, "%d\n", paused_snack);
+              fprintf(writestate, "%d\n", paused_coins);
+              fprintf(writestate, "%d\n", paused_car_up);
+              fprintf(writestate, "%d\n", paused_car_down);
+              fprintf(writestate, "%d\n", paused_car_left);
+              fprintf(writestate, "%d\n", paused_car_right);
+              fprintf(writestate, "%d\n", paused_midFrame, paused_topFrame, paused_bottomFrame);
+              fprintf(writestate, "%d\n", paused_stamina);
+              fprintf(writestate, "%d\n", paused_stamina_blow);
+              fprintf(writestate, "%d\n", paused_bike_up_stat);
+              fprintf(writestate, "%d\n", paused_bike_down_stat);
+              fprintf(writestate, "%d\n", paused_ypos_bike_up);
+              fprintf(writestate, "%d\n", paused_ypos_bike_down);
+              for (int paused_xypos_vehicle_idx = 0; paused_xypos_vehicle_idx < 8; paused_xypos_vehicle_idx++) {
+                fprintf(writestate, "%d\n", paused_xpos_up[paused_xypos_vehicle_idx]);
+                fprintf(writestate, "%d\n", paused_xpos_down[paused_xypos_vehicle_idx]);
+                fprintf(writestate, "%d\n", paused_xpos_left[paused_xypos_vehicle_idx]);
+                fprintf(writestate, "%d\n", paused_xpos_right[paused_xypos_vehicle_idx]);
+                fprintf(writestate, "%d\n", paused_ypos_up[paused_xypos_vehicle_idx]);
+                fprintf(writestate, "%d\n", paused_ypos_down[paused_xypos_vehicle_idx]);
+              }
+              fprintf(writestate, "%d\n", paused_y_left);
+              fprintf(writestate, "%d\n", paused_y_right);
+              for (int paused_xypos_consumable_idx = 0; paused_xypos_consumable_idx < 16; paused_xypos_consumable_idx++) {
+                fprintf(writestate, "%d\n", paused_xpos_snack[paused_xypos_consumable_idx]);
+                fprintf(writestate, "%d\n", paused_ypos_snack[paused_xypos_consumable_idx]);
+                fprintf(writestate, "%d\n", paused_xpos_coin[paused_xypos_consumable_idx]);
+                fprintf(writestate, "%d\n", paused_ypos_coin[paused_xypos_consumable_idx]);
+              }
+              fprintf(writestate, "%d\n", paused_left_permit);
+              fprintf(writestate, "%d\n", paused_right_permit);
+
+              fclose(writestate);
+            }
 
             printf("Saved state\n");
             game_paused = false;
