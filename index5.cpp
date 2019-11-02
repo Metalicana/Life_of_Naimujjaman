@@ -676,13 +676,13 @@ int main(int argc,char *argv[])
       begin:
 
       SDL_Event e;
-
+      
       int ident=0,f=0,p_f=6,l_f=6,t_f=6,q_f=6,h_f=6,r_f=6,s_f=6,m_f=6;
       int side_walk_y_1 = 0,side_walk_y_2=-1440;
       int side_walk_y_3 = 0,side_walk_y_4 = -1440;
       int out_of_bounds_y_1 = 0,out_of_bounds_y_2 = -1440;
       int out_of_bounds_y_3 = 0,out_of_bounds_y_4 = -1440;
-      int character_x = 15,character_y=600;
+      int character_x = 171,character_y=600;
       int road_x = 340,road_y_1 = 0,road_y_2=-1440;
       int mx,my;
       bool moto = false;
@@ -1410,6 +1410,7 @@ int main(int argc,char *argv[])
              }
            }
          }
+
          if(stamina<0)
          {
            in_game = false;
@@ -1710,6 +1711,63 @@ int main(int argc,char *argv[])
             }
             f++;
             if(f >= 9)f=0;
+          }
+          if (is_colliding(character_x, character_y, 0, (out_of_bounds_y_1 + 345), 660, 170))
+          {
+            if (character_x < 170 && state[SDL_SCANCODE_LEFT])
+            {
+              character_x = 170 + 1;
+            }
+            else if (character_x < 170 && character_y < out_of_bounds_y_1 + 1005 && state[SDL_SCANCODE_UP])
+            {
+              character_y = out_of_bounds_y_1 + 1005 + 1;
+            }
+            else if (character_x < 170 && character_y > out_of_bounds_y_1 + 235 && state[SDL_SCANCODE_DOWN])
+            {
+              character_y = out_of_bounds_y_1 + 345 - 111;
+            }
+          }
+          else if (is_colliding(character_x, character_y, 0, (out_of_bounds_y_2 + 345), 660, 170))
+          {
+            if (character_x < 170 && state[SDL_SCANCODE_LEFT])
+            {
+              character_x = 170 + 1;
+            }
+            else if (character_x < 170 && character_y < out_of_bounds_y_2 + 1005 && state[SDL_SCANCODE_UP]) {
+              character_y = out_of_bounds_y_2 + 1005 + 1;
+            }
+            else if (character_x < 170 && character_y > out_of_bounds_y_2 + 235 && state[SDL_SCANCODE_DOWN])
+            {
+              character_y = out_of_bounds_y_2 + 345 - 111;
+            }
+          }
+          if (is_colliding(character_x, character_y, 1110, (out_of_bounds_y_3 + 345), 660, 170))
+          {
+            if (character_x > (1110 - 90) && state[SDL_SCANCODE_RIGHT])
+            {
+              character_x = (1110 - 90) - 1;
+            }
+            else if (character_x > (1110 - 90) && character_y < out_of_bounds_y_3 + 1005 && state[SDL_SCANCODE_UP]) {
+              character_y = out_of_bounds_y_3 + 1005 + 1;
+            }
+            else if (character_x > (1110 - 90) && character_y > out_of_bounds_y_3 + 235 && state[SDL_SCANCODE_DOWN])
+            {
+              character_y = out_of_bounds_y_3 + 345 - 111;
+            }
+          }
+          if (is_colliding(character_x, character_y, 1110, (out_of_bounds_y_4 + 345), 660, 170))
+          {
+            if (character_x > (1110 - 90) && state[SDL_SCANCODE_RIGHT])
+            {
+              character_x = (1110 - 90) - 1;
+            }
+            else if (character_x > (1110 - 90) && character_y < out_of_bounds_y_4 + 1005 && state[SDL_SCANCODE_UP]) {
+              character_y = out_of_bounds_y_4 + 1005 + 1;
+            }
+            else if (character_x > (1110 - 90) && character_y > out_of_bounds_y_4 + 235 && state[SDL_SCANCODE_DOWN])
+            {
+              character_y = out_of_bounds_y_4 + 345 - 111;
+            }
           }
         }
           if (game_paused) {
