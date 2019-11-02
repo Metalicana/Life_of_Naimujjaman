@@ -75,6 +75,7 @@ SDL_Rect coin_rect[coin_animation];
 SDL_Rect logo_rect;
 SDL_Rect road_rect;
 SDL_Rect side_walk_rect,side_walk_rect_2;
+SDL_Rect out_of_bounds_left_rect,out_of_bounds_right_rect;
 SDL_Rect chips_rect,frooto_rect;
 SDL_Rect scorename_rect[totalscorenum];
 SDL_Rect score_rect[totalscorenum];
@@ -126,7 +127,7 @@ private:
 };
 
 texture_jinish skeleton,play_button,load_button,tutorial_button,quit_button,hof_button,back_circ_button,resume_button,state_button,menu_button,button_shadow,logo;
-texture_jinish road,side_walk,side_walk_2;
+texture_jinish road,side_walk,side_walk_2,out_of_bounds_left,out_of_bounds_right;
 texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
 texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
 texture_jinish gari_left,gari_right,bus_left,bus_right,dotola_bus_left,dotola_bus_right,cng_left,cng_right;
@@ -510,6 +511,8 @@ bool loadMedia()
   s = s & button_shadow.loadFromFile("btn_shadow_sprite.png");
   s = s & side_walk.loadFromFile("sidewalk_left.png");
   s = s & side_walk_2.loadFromFile("sidewalk_right.png");
+  s = s & out_of_bounds_left.loadFromFile("out_of_bounds_left.png");
+  s = s & out_of_bounds_right.loadFromFile("out_of_bounds_right.png");
   s = s & gari_up.loadFromFile("car1.png");
   s = s & bus_up.loadFromFile("bus1.png");
   s = s & dotola_bus_up.loadFromFile("dd1.png");
@@ -551,6 +554,8 @@ bool loadMedia()
   logo_rect.x = 150;logo_rect.y = 48;logo_rect.h =243-48;logo_rect.w = 488-150;
   side_walk_rect.x =0,side_walk_rect.y=0,side_walk_rect.h=1440,side_walk_rect.w=170;
   side_walk_rect_2.x =0,side_walk_rect_2.y=0,side_walk_rect_2.h=1440,side_walk_rect_2.w=170;
+  out_of_bounds_left_rect.x =0,out_of_bounds_left_rect.y=0,out_of_bounds_left_rect.h=1440,out_of_bounds_left_rect.w=170;
+  out_of_bounds_right_rect.x =0,out_of_bounds_right_rect.y=0,out_of_bounds_right_rect.h=1440,out_of_bounds_right_rect.w=170;
   chips_rect.x = 0,chips_rect.y = 0,chips_rect.w =48,chips_rect.h=60;
   frooto_rect.x = 0,frooto_rect.y = 0,frooto_rect.w = 24,frooto_rect.h = 60;
   currentscore_rect.x = 0,currentscore_rect.y = 0,currentscore_rect.w = 250,currentscore_rect.h = 50;
@@ -642,7 +647,8 @@ bool loadMedia()
 }
 void close()
 {
-  play_button.free();load_button.free();tutorial_button.free();quit_button.free();hof_button.free();back_circ_button.free();resume_button.free();state_button.free();menu_button.free();button_shadow.free();logo.free();road.free();side_walk.free();side_walk_2.free();
+  play_button.free();load_button.free();tutorial_button.free();quit_button.free();hof_button.free();back_circ_button.free();resume_button.free();state_button.free();menu_button.free();button_shadow.free();logo.free();road.free();
+  side_walk.free();side_walk_2.free();out_of_bounds_left.free();out_of_bounds_right.free();
   gari_up.free();bus_up.free();dotola_bus_up.free();cng_up.free();
   gari_down.free();bus_down.free();dotola_bus_down.free();cng_down.free();
   skeleton.free();
@@ -674,6 +680,8 @@ int main(int argc,char *argv[])
       int ident=0,f=0,p_f=6,l_f=6,t_f=6,q_f=6,h_f=6,r_f=6,s_f=6,m_f=6;
       int side_walk_y_1 = 0,side_walk_y_2=-1440;
       int side_walk_y_3 = 0,side_walk_y_4 = -1440;
+      int out_of_bounds_y_1 = 0,out_of_bounds_y_2 = -1440;
+      int out_of_bounds_y_3 = 0,out_of_bounds_y_4 = -1440;
       int character_x = 15,character_y=600;
       int road_x = 340,road_y_1 = 0,road_y_2=-1440;
       int mx,my;
@@ -740,6 +748,10 @@ int main(int argc,char *argv[])
       int paused_side_walk_y_2;
       int paused_side_walk_y_3;
       int paused_side_walk_y_4;
+      int paused_out_of_bounds_y_1;
+      int paused_out_of_bounds_y_2;
+      int paused_out_of_bounds_y_3;
+      int paused_out_of_bounds_y_4;
       int paused_character_x;
       int paused_character_y;
       int paused_road_x;
@@ -954,6 +966,10 @@ int main(int argc,char *argv[])
                 fscanf(readstate, "%d", &side_walk_y_2);
                 fscanf(readstate, "%d", &side_walk_y_3);
                 fscanf(readstate, "%d", &side_walk_y_4);
+                fscanf(readstate, "%d", &out_of_bounds_y_1);
+                fscanf(readstate, "%d", &out_of_bounds_y_2);
+                fscanf(readstate, "%d", &out_of_bounds_y_3);
+                fscanf(readstate, "%d", &out_of_bounds_y_4);
                 fscanf(readstate, "%d", &character_x);
                 fscanf(readstate, "%d", &character_y);
                 fscanf(readstate, "%d", &road_x);
@@ -1547,6 +1563,10 @@ int main(int argc,char *argv[])
           if(side_walk_y_2 >= 1440)side_walk_y_2=-1440;
           if(side_walk_y_3 >= 1440)side_walk_y_3=-1440;
           if(side_walk_y_4 >= 1440)side_walk_y_4=-1440;
+          if(out_of_bounds_y_1 >= 1440)out_of_bounds_y_1=-1440;
+          if(out_of_bounds_y_2 >= 1440)out_of_bounds_y_2=-1440;
+          if(out_of_bounds_y_3 >= 1440)out_of_bounds_y_3=-1440;
+          if(out_of_bounds_y_4 >= 1440)out_of_bounds_y_4=-1440;
 
           road.render(road_x,road_y_1,&road_rect);
           road.render(road_x,road_y_2,&road_rect);//two road tiling one after another creating an illusion of continuity
@@ -1554,6 +1574,10 @@ int main(int argc,char *argv[])
           side_walk.render(road_x - 170,side_walk_y_2,&side_walk_rect);
           side_walk_2.render(road_x+600,side_walk_y_3,&side_walk_rect_2);
           side_walk_2.render(road_x+600,side_walk_y_4,&side_walk_rect_2);
+          out_of_bounds_left.render(road_x - 340,out_of_bounds_y_1,&out_of_bounds_left_rect);
+          out_of_bounds_left.render(road_x - 340,out_of_bounds_y_2,&out_of_bounds_left_rect);
+          out_of_bounds_right.render(road_x + 770,out_of_bounds_y_3,&out_of_bounds_right_rect);
+          out_of_bounds_right.render(road_x + 770,out_of_bounds_y_4,&out_of_bounds_right_rect);
           currentscore_backdrop.render(869, 97, &currentscore_backdrop_rect);
           currentscore.RasteriseText(tempscore_string);
           currentscore_rect.w = currentscore.getW();
@@ -1632,6 +1656,10 @@ int main(int argc,char *argv[])
                 side_walk_y_2 += fps;
                 side_walk_y_3 += fps;
                 side_walk_y_4 += fps;
+                out_of_bounds_y_1 += fps;
+                out_of_bounds_y_2 += fps;
+                out_of_bounds_y_3 += fps;
+                out_of_bounds_y_4 += fps;
                 for(int w=0;w<16;w++)
                 {
                   if(marker_snacks[0][w] || marker_snacks[1][w])ypos_snack[w]+=fps;
@@ -1696,6 +1724,10 @@ int main(int argc,char *argv[])
             paused_side_walk_y_2 = side_walk_y_2;
             paused_side_walk_y_3 = side_walk_y_3;
             paused_side_walk_y_4 = side_walk_y_4;
+            paused_out_of_bounds_y_1 = out_of_bounds_y_1;
+            paused_out_of_bounds_y_2 = out_of_bounds_y_2;
+            paused_out_of_bounds_y_3 = out_of_bounds_y_3;
+            paused_out_of_bounds_y_4 = out_of_bounds_y_4;
             paused_character_x = character_x;
             paused_character_y = character_y;
             paused_road_x = road_x;
@@ -1818,6 +1850,10 @@ int main(int argc,char *argv[])
               fprintf(writestate, "%d\n", paused_side_walk_y_2);
               fprintf(writestate, "%d\n", paused_side_walk_y_3);
               fprintf(writestate, "%d\n", paused_side_walk_y_4);
+              fprintf(writestate, "%d\n", paused_out_of_bounds_y_1);
+              fprintf(writestate, "%d\n", paused_out_of_bounds_y_2);
+              fprintf(writestate, "%d\n", paused_out_of_bounds_y_3);
+              fprintf(writestate, "%d\n", paused_out_of_bounds_y_4);
               fprintf(writestate, "%d\n", paused_character_x);
               fprintf(writestate, "%d\n", paused_character_y);
               fprintf(writestate, "%d\n", paused_road_x);
