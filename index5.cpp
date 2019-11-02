@@ -22,10 +22,11 @@ const int button_height = 119;
 const int button_width = 323;
 const int coin_width = 32;
 const int coin_height = 32;
-const int play_button_x = 275,play_button_y = 400;
-const int load_button_x = 275,load_button_y = 500;
-const int quit_button_x = 625,quit_button_y = 500;
-const int hof_button_x = 625,hof_button_y = 400;
+const int play_button_x = 275,play_button_y = 350;
+const int load_button_x = 275,load_button_y = 450;
+const int tutorial_button_x = 625,tutorial_button_y = 450;
+const int quit_button_x = 425,quit_button_y = 550;
+const int hof_button_x = 625,hof_button_y = 350;
 const int back_circ_button_x = 100,back_circ_button_y = 50;
 const int resume_button_x = 450, resume_button_y = 300;
 const int state_button_x = 450, state_button_y = 400;
@@ -57,6 +58,7 @@ SDL_Rect going_left[walking];
 SDL_Rect going_right[walking];
 SDL_Rect play_button_rect;
 SDL_Rect load_button_rect;
+SDL_Rect tutorial_button_rect;
 SDL_Rect quit_button_rect;
 SDL_Rect hof_button_rect;
 SDL_Rect back_circ_button_rect;
@@ -79,6 +81,7 @@ SDL_Rect score_rect[totalscorenum];
 SDL_Rect currentscore_rect,currentscore_backdrop_rect;
 SDL_Rect scoresave_text_rect, scoresave_name_rect;
 SDL_Rect hof_bg_rect;
+SDL_Rect tutorial_bg_rect;
 SDL_Rect pause_screen_rect;
 SDL_Rect savestate_dlg_rect;
 TTF_Font *main_font;
@@ -122,7 +125,7 @@ private:
   bool mPaused,mStarted;
 };
 
-texture_jinish skeleton,play_button,load_button,quit_button,hof_button,back_circ_button,resume_button,state_button,menu_button,button_shadow,logo;
+texture_jinish skeleton,play_button,load_button,tutorial_button,quit_button,hof_button,back_circ_button,resume_button,state_button,menu_button,button_shadow,logo;
 texture_jinish road,side_walk,side_walk_2;
 texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
 texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
@@ -130,7 +133,7 @@ texture_jinish gari_left,gari_right,bus_left,bus_right,dotola_bus_left,dotola_bu
 texture_jinish chips,frooto,coin;
 texture_jinish scorename[10],score[10],currentscore,currentscore_backdrop,scoresave_text,scoresave_name;
 texture_jinish bike_up,bike_down;
-texture_jinish hof_bg, pause_screen;
+texture_jinish hof_bg, pause_screen, tutorial_bg;
 texture_jinish savestate_dlg;
 timer clock_release,clock_move,snacks,beka,tera;
 bool init();//Initialization
@@ -497,6 +500,7 @@ bool loadMedia()
   s = s & road.loadFromFile("road.png");
   s = s & play_button.loadFromFile("play_btn.png");
   s = s & load_button.loadFromFile("load_btn.png");
+  s = s & tutorial_button.loadFromFile("tutorial_btn.png");
   s = s & quit_button.loadFromFile("quit_btn.png");
   s = s & hof_button.loadFromFile("hof_btn.png");
   s = s & back_circ_button.loadFromFile("back_circ_btn.png");
@@ -520,6 +524,7 @@ bool loadMedia()
   s = s & bike_down.loadFromFile("bike2.png");
   s = s & coin.loadFromFile("coinsprites/coinspritesheet.png");
   s = s & hof_bg.loadFromFile("hof_bg.png");
+  s = s & tutorial_bg.loadFromFile("tutorial_bg.png");
   s = s & pause_screen.loadFromFile("pause_screen.png");
   s = s & savestate_dlg.loadFromFile("savestate_dlg.png");
   s = s & gari_left.loadFromFile("car4.png");
@@ -535,6 +540,7 @@ bool loadMedia()
 
   play_button_rect.x = 0;play_button_rect.y = 0;play_button_rect.h = 119;play_button_rect.w = 363;
   load_button_rect.x = 0;load_button_rect.y = 0;load_button_rect.h = 119;load_button_rect.w = 363;
+  tutorial_button_rect.x = 0;tutorial_button_rect.y = 0;tutorial_button_rect.h = 119;tutorial_button_rect.w = 363;
   quit_button_rect.x = 0;quit_button_rect.y = 0;quit_button_rect.h = 119;quit_button_rect.w = 363;
   hof_button_rect.x = 0;hof_button_rect.y = 0;hof_button_rect.h = 119;hof_button_rect.w = 363;
   back_circ_button_rect.x = 0;back_circ_button_rect.y = 0;back_circ_button_rect.w = 50;back_circ_button_rect.h = 50;
@@ -549,6 +555,7 @@ bool loadMedia()
   frooto_rect.x = 0,frooto_rect.y = 0,frooto_rect.w = 24,frooto_rect.h = 60;
   currentscore_rect.x = 0,currentscore_rect.y = 0,currentscore_rect.w = 250,currentscore_rect.h = 50;
   hof_bg_rect.x = 0,hof_bg_rect.y = 0,hof_bg_rect.w = 1280,hof_bg_rect.h = 720;
+  tutorial_bg_rect.x = 0,tutorial_bg_rect.y = 0,tutorial_bg_rect.w = 1280,tutorial_bg_rect.h = 720;
   pause_screen_rect.x = 0,pause_screen_rect.y = 0,pause_screen_rect.w = 1280,pause_screen_rect.h = 720;
   savestate_dlg_rect.x = 0,savestate_dlg_rect.y = 0,savestate_dlg_rect.w = 200,savestate_dlg_rect.h = 60;
   currentscore_backdrop_rect.x = 0,currentscore_backdrop_rect.y = 0,currentscore_backdrop_rect.w = 300,currentscore_backdrop_rect.h = 70;currentscore_backdrop.setAlpha(120);
@@ -635,7 +642,7 @@ bool loadMedia()
 }
 void close()
 {
-  play_button.free();load_button.free();quit_button.free();hof_button.free();back_circ_button.free();resume_button.free();state_button.free();menu_button.free();button_shadow.free();logo.free();road.free();side_walk.free();side_walk_2.free();
+  play_button.free();load_button.free();tutorial_button.free();quit_button.free();hof_button.free();back_circ_button.free();resume_button.free();state_button.free();menu_button.free();button_shadow.free();logo.free();road.free();side_walk.free();side_walk_2.free();
   gari_up.free();bus_up.free();dotola_bus_up.free();cng_up.free();
   gari_down.free();bus_down.free();dotola_bus_down.free();cng_down.free();
   skeleton.free();
@@ -664,7 +671,7 @@ int main(int argc,char *argv[])
 
       SDL_Event e;
 
-      int ident=0,f=0,p_f=6,l_f=6,q_f=6,h_f=6,r_f=6,s_f=6,m_f=6;
+      int ident=0,f=0,p_f=6,l_f=6,t_f=6,q_f=6,h_f=6,r_f=6,s_f=6,m_f=6;
       int side_walk_y_1 = 0,side_walk_y_2=-1440;
       int side_walk_y_3 = 0,side_walk_y_4 = -1440;
       int character_x = 15,character_y=600;
@@ -679,6 +686,7 @@ int main(int argc,char *argv[])
       bool quit = false;
       bool in_game=false;
       bool in_scoreboard = false;
+      bool in_tutorial = false;
       bool marker_up[4][8] = {0};
       bool marker_down[4][8] = {0};
       bool marker_left[4][8] = {0};
@@ -816,6 +824,10 @@ int main(int argc,char *argv[])
                 loadstate = true;
                 in_game = true;
               }
+              else if((hover(mx,my,tutorial_button_x,tutorial_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
+              {
+                in_tutorial = true;
+              }
               else if((hover(mx,my,quit_button_x,quit_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
               {
                 quit = true;
@@ -824,9 +836,16 @@ int main(int argc,char *argv[])
               {
                 in_scoreboard = true;
               }
-              else if((hover(mx,my,back_circ_button_x,back_circ_button_y,50,50)) && in_scoreboard)
+              else if((hover(mx,my,back_circ_button_x,back_circ_button_y,50,50)) && (in_scoreboard || in_tutorial))
               {
-                in_scoreboard = false;
+                if (in_scoreboard)
+                {
+                  in_scoreboard = false;
+                }
+                else
+                {
+                  in_tutorial = false;
+                }
               }
               else if((hover(mx,my,resume_button_x,resume_button_y,button_height,button_width)) && in_game && game_paused)
               {
@@ -1952,6 +1971,16 @@ int main(int argc,char *argv[])
           }
 
         }
+        else if(in_tutorial)
+        {
+          SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+          SDL_RenderClear( main_renderer );
+
+          tutorial_bg.render(0, 0, &tutorial_bg_rect);
+          back_circ_button.render(back_circ_button_x, back_circ_button_y, &back_circ_button_rect);
+
+          SDL_RenderPresent(main_renderer);
+        }
         else
         {
           SDL_GetMouseState(&mx,&my);//current mouce coordinates
@@ -1961,9 +1990,11 @@ int main(int argc,char *argv[])
             p_f--;//if we hover over play button then run frames for play animation
             if(p_f< 0)p_f = 0;
             l_f++;
+            t_f++;
             q_f++;
             h_f++;
             if(l_f >= 6)l_f = 6;
+            if(t_f >= 6)t_f = 6;
             if(q_f >= 6)q_f = 6;
             if(h_f >= 6)h_f = 6;
           }
@@ -1973,9 +2004,25 @@ int main(int argc,char *argv[])
             l_f--;//if we hover over play button then run frames for play animation
             if(l_f< 0)l_f = 0;
             p_f++;
+            t_f++;
             h_f++;
             q_f++;
             if(p_f >= 6)p_f = 6;
+            if(t_f >= 6)t_f = 6;
+            if(h_f >= 6)h_f = 6;
+            if(q_f >= 6)q_f = 6;
+          }
+          else if(hover(mx,my,tutorial_button_x,tutorial_button_y,button_height,button_width))
+          {
+            SDL_Delay(50);
+            t_f--;//if we hover over play button then run frames for play animation
+            if(t_f< 0)t_f = 0;
+            p_f++;
+            l_f++;
+            h_f++;
+            q_f++;
+            if(p_f >= 6)p_f = 6;
+            if(l_f >= 6)l_f = 6;
             if(h_f >= 6)h_f = 6;
             if(q_f >= 6)q_f = 6;
           }
@@ -1986,10 +2033,12 @@ int main(int argc,char *argv[])
             if(q_f < 0)q_f = 0;
             p_f++;
             l_f++;
+            t_f++;
             h_f++;
-            if(p_f >= 6)p_f=6;
+            if(p_f >= 6)p_f = 6;
             if(l_f >= 6)l_f = 6;
-            if(h_f >= 6)h_f=6;
+            if(t_f >= 6)t_f = 6;
+            if(h_f >= 6)h_f = 6;
           }
           else if(hover(mx,my,hof_button_x,hof_button_y,button_height,button_width))
           {
@@ -1997,21 +2046,25 @@ int main(int argc,char *argv[])
             h_f--;//if we hover over quit button then run frames for quit animation
             if(h_f < 0)h_f = 0;
             l_f++;
+            t_f++;
             p_f++;
             q_f++;
-            if(p_f >= 6)p_f=6;
+            if(p_f >= 6)p_f = 6;
             if(l_f >= 6)l_f = 6;
-            if(q_f >= 6)q_f=6;
+            if(t_f >= 6)t_f = 6;
+            if(q_f >= 6)q_f = 6;
           }
           else
           {
             p_f++;//we want to increment both frames to the last to bring animation of button to ground state
             l_f++;
+            t_f++;
             q_f++;
             h_f++;
             SDL_Delay(50);
             if(p_f>= 6)p_f = 6;
             if(l_f >= 6)l_f = 6;
+            if(t_f >= 6)t_f = 6;
             if(q_f >= 6)q_f = 6;
             if(h_f >= 6)h_f = 6;
           }
@@ -2024,6 +2077,8 @@ int main(int argc,char *argv[])
           play_button.render(play_button_x,play_button_y,&play_button_rect);//play button render
           button_shadow.render(load_button_x,load_button_y,button_shadow_array+l_f);
           load_button.render(load_button_x,load_button_y,&load_button_rect);
+          button_shadow.render(tutorial_button_x,tutorial_button_y,button_shadow_array+t_f);
+          tutorial_button.render(tutorial_button_x,tutorial_button_y,&tutorial_button_rect);
           button_shadow.render(hof_button_x,hof_button_y,button_shadow_array+h_f);
           hof_button.render(hof_button_x,hof_button_y,&hof_button_rect);
           logo.render(470,100,&logo_rect);//logo render
