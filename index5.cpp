@@ -676,13 +676,13 @@ int main(int argc,char *argv[])
       begin:
 
       SDL_Event e;
-      
+
       int ident=0,f=0,p_f=6,l_f=6,t_f=6,q_f=6,h_f=6,r_f=6,s_f=6,m_f=6;
       int side_walk_y_1 = 0,side_walk_y_2=-1440;
       int side_walk_y_3 = 0,side_walk_y_4 = -1440;
       int out_of_bounds_y_1 = 0,out_of_bounds_y_2 = -1440;
       int out_of_bounds_y_3 = 0,out_of_bounds_y_4 = -1440;
-      int character_x = 171,character_y=600;
+      int character_x = 180,character_y=600;
       int road_x = 340,road_y_1 = 0,road_y_2=-1440;
       int mx,my;
       bool moto = false;
@@ -737,6 +737,7 @@ int main(int argc,char *argv[])
       int fff;
       bool right_permit=1;
       bool left_permit=1;
+      bool walk_limit = true;
 
       Uint32 paused_clock_release_ticks;
       Uint32 paused_clock_move_ticks;
@@ -1585,9 +1586,9 @@ int main(int argc,char *argv[])
           currentscore.render(900, 100, &currentscore_rect);
 
           if(character_x < 0)character_x = 0;
-          if(character_x > 1280)character_x = 1280;
+          if(character_x + 90 > 1280)character_x = 1280 - 90;
           if(character_y < 0)character_y = 0;
-          if(character_y > 720)character_y = 720;
+          if(character_y + 110 > 720)character_y = 720 - 110;
           for(int w=0;w<16;w++)
           {
             if(marker_snacks[0][w])chips.render(xpos_snack[w],ypos_snack[w],&chips_rect);
@@ -1712,61 +1713,40 @@ int main(int argc,char *argv[])
             f++;
             if(f >= 9)f=0;
           }
-          if (is_colliding(character_x, character_y, 0, (out_of_bounds_y_1 + 345), 660, 170))
-          {
-            if (character_x < 170 && state[SDL_SCANCODE_LEFT])
-            {
-              character_x = 170 + 1;
+          if ((out_of_bounds_y_1 > -1440 && out_of_bounds_y_1 <= 720) || (out_of_bounds_y_2 > -1440 && out_of_bounds_y_2 <= 720)) {
+            if ((character_y - fps> out_of_bounds_y_1 + 235 && character_y + fps < out_of_bounds_y_1 + 1005) || (character_y - fps> out_of_bounds_y_2 + 235 && character_y + fps < out_of_bounds_y_2 + 1005)) {
+              //printf("True\n");
+              walk_limit = true;
             }
-            else if (character_x < 170 && character_y < out_of_bounds_y_1 + 1005 && state[SDL_SCANCODE_UP])
-            {
-              character_y = out_of_bounds_y_1 + 1005 + 1;
-            }
-            else if (character_x < 170 && character_y > out_of_bounds_y_1 + 235 && state[SDL_SCANCODE_DOWN])
-            {
-              character_y = out_of_bounds_y_1 + 345 - 111;
+            else {
+              //printf("False\n");
+              walk_limit = false;
             }
           }
-          else if (is_colliding(character_x, character_y, 0, (out_of_bounds_y_2 + 345), 660, 170))
-          {
-            if (character_x < 170 && state[SDL_SCANCODE_LEFT])
-            {
-              character_x = 170 + 1;
+
+          if (!walk_limit){
+            //printf("Char y %d\n", character_y);
+            //printf("y_2 %d\n", out_of_bounds_y_2);
+            if ((character_x < 170 || character_x > 1020) && character_y < out_of_bounds_y_1 + 1005 && out_of_bounds_y_1 + 1005 < 720 && out_of_bounds_y_2 + 1005 > 0 && out_of_bounds_y_1 + 1005 > 0) {
+              character_y = out_of_bounds_y_1 + 1005;
             }
-            else if (character_x < 170 && character_y < out_of_bounds_y_2 + 1005 && state[SDL_SCANCODE_UP]) {
-              character_y = out_of_bounds_y_2 + 1005 + 1;
+            else if ((character_x < 170 || character_x > 1020) && character_y < out_of_bounds_y_2 + 1005 && out_of_bounds_y_2 + 1005 < 720 && out_of_bounds_y_2 + 1005 < 720 && out_of_bounds_y_2 + 1005 > 0) {
+              character_y = out_of_bounds_y_2 + 1005;
             }
-            else if (character_x < 170 && character_y > out_of_bounds_y_2 + 235 && state[SDL_SCANCODE_DOWN])
-            {
-              character_y = out_of_bounds_y_2 + 345 - 111;
+            else if ((character_x < 170 || character_x > 1020) && character_y + 110 > out_of_bounds_y_1 + 345 && out_of_bounds_y_1 + 345 < 720 && out_of_bounds_y_1 + 345 > 0) {
+              character_y = out_of_bounds_y_1 + 235;
             }
-          }
-          if (is_colliding(character_x, character_y, 1110, (out_of_bounds_y_3 + 345), 660, 170))
-          {
-            if (character_x > (1110 - 90) && state[SDL_SCANCODE_RIGHT])
-            {
-              character_x = (1110 - 90) - 1;
-            }
-            else if (character_x > (1110 - 90) && character_y < out_of_bounds_y_3 + 1005 && state[SDL_SCANCODE_UP]) {
-              character_y = out_of_bounds_y_3 + 1005 + 1;
-            }
-            else if (character_x > (1110 - 90) && character_y > out_of_bounds_y_3 + 235 && state[SDL_SCANCODE_DOWN])
-            {
-              character_y = out_of_bounds_y_3 + 345 - 111;
+            else if ((character_x < 170 || character_x > 1020) && character_y + 110 > out_of_bounds_y_2 + 345 && out_of_bounds_y_2 + 345 < 720 && out_of_bounds_y_2 + 345 > 0) {
+              character_y = out_of_bounds_y_2 + 235;
             }
           }
-          if (is_colliding(character_x, character_y, 1110, (out_of_bounds_y_4 + 345), 660, 170))
+          else if (walk_limit)
           {
-            if (character_x > (1110 - 90) && state[SDL_SCANCODE_RIGHT])
-            {
-              character_x = (1110 - 90) - 1;
+            if (character_x < 170) {
+              character_x = 170;
             }
-            else if (character_x > (1110 - 90) && character_y < out_of_bounds_y_4 + 1005 && state[SDL_SCANCODE_UP]) {
-              character_y = out_of_bounds_y_4 + 1005 + 1;
-            }
-            else if (character_x > (1110 - 90) && character_y > out_of_bounds_y_4 + 235 && state[SDL_SCANCODE_DOWN])
-            {
-              character_y = out_of_bounds_y_4 + 345 - 111;
+            if (character_x > 1110 - 90) {
+              character_x = 1110 - 90;
             }
           }
         }
