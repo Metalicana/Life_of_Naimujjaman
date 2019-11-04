@@ -137,6 +137,8 @@ texture_jinish bike_up,bike_down;
 texture_jinish hof_bg, pause_screen, tutorial_bg;
 texture_jinish savestate_dlg;
 timer clock_release,clock_move,snacks,beka,tera;
+timer upre,niche;
+timer blinker;
 bool init();//Initialization
 bool loadMedia();//loads media
 void close();//memory saving before closing
@@ -738,6 +740,8 @@ int main(int argc,char *argv[])
       bool right_permit=1;
       bool left_permit=1;
       bool walk_limit = true;
+      bool is_already_hit=false;
+      bool blink_toggle = false;
 
       Uint32 paused_clock_release_ticks;
       Uint32 paused_clock_move_ticks;
@@ -825,6 +829,9 @@ int main(int argc,char *argv[])
                 snacks.start();
                 beka.start();
                 tera.start();
+                upre.start();
+                niche.start();
+                blinker.start();
                 in_game = true;
               }
               else if((hover(mx,my,load_button_x,load_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
@@ -834,6 +841,9 @@ int main(int argc,char *argv[])
                 snacks.start();
                 beka.start();
                 tera.start();
+                upre.start();
+                niche.start();
+                blinker.start();
                 loadstate = true;
                 in_game = true;
               }
@@ -868,6 +878,9 @@ int main(int argc,char *argv[])
                 snacks.unpause();
                 beka.unpause();
                 tera.unpause();
+                upre.unpause();
+                niche.unpause();
+                blinker.unpause();
               }
               else if((hover(mx,my,state_button_x,state_button_y,button_height,button_width)) && in_game && game_paused)
               {
@@ -880,6 +893,9 @@ int main(int argc,char *argv[])
                 snacks.stop();
                 beka.stop();
                 tera.stop();
+                upre.stop();
+                niche.stop();
+                blinker.stop();
                 goto begin;
               }
 
@@ -905,6 +921,9 @@ int main(int argc,char *argv[])
                   snacks.pause();
                   beka.pause();
                   tera.pause();
+                  upre.pause();
+                  niche.pause();
+                  blinker.pause();
                 }
                 else {
                   game_paused = false;
@@ -913,6 +932,9 @@ int main(int argc,char *argv[])
                   snacks.unpause();
                   beka.unpause();
                   tera.unpause();
+                  upre.unpause();
+                  niche.unpause();
+                  blinker.unpause();
                 }
               }
             }
@@ -1159,37 +1181,19 @@ int main(int argc,char *argv[])
          c_f++;
          if(c_f >= 36)c_f = 0;
 
-         if(clock_release.getTicks()%1000 <= 20 && rand()%15<10)
+         if(upre.getTicks() >= 1500 && rand()%15<10)
          {
            srand(time(NULL));
+           upre.stop();
+           upre.start();
            vehicle_variant_selector = rand()%4;
-           if(!marker_up[0][car_up]&&!marker_up[1][car_up]&&!marker_up[2][car_up]&&!marker_up[3][car_up])
-           {
-             if(car_up> 0)
-             {
-               if(marker_up[0][car_up-1]|| marker_up[1][car_up-1]|| marker_up[2][car_up-1]||marker_up[3][car_up-1])
-               {
-                 if(ypos_up[car_up-1]> 200)marker_up[vehicle_variant_selector][car_up++]=1;
-               }
-               else marker_up[vehicle_variant_selector][car_up++]=1;
-             }
-             else
-             {
-               if(marker_up[0][7]|| marker_up[1][7]|| marker_up[2][7]||marker_up[3][7])
-               {
-                 if(ypos_up[7]> 200)marker_up[vehicle_variant_selector][car_up++]=1;
-               }
-               else marker_up[vehicle_variant_selector][car_up++]=1;
-             }
-
-           }
-
-
+           marker_up[vehicle_variant_selector][car_up++]=1;
          }
-
-         if(rand()%10 < 8 && snacks.getTicks()%1000 <= 20 && character_y <= 360 && state[SDL_SCANCODE_UP])
+         if(rand()%10 < 8 && snacks.getTicks()>= 1000 && character_y <= 360 && state[SDL_SCANCODE_UP])
          {
            srand(time(NULL));
+           snacks.stop();
+           snacks.start();
            snack_variant_selector = rand()%2;
            if(!marker_snacks[0][snack] && !marker_snacks[1][snack])
            {
@@ -1205,30 +1209,13 @@ int main(int argc,char *argv[])
            }
          }
          srand(time(NULL));
-         if(clock_release.getTicks()%1000 <= 20 && rand()%15<10)
+         if(niche.getTicks() >= 1500 && rand()%15<10)
          {
            srand(time(NULL));
+           niche.stop();
+           niche.start();
            vehicle_variant_selector = (clock_move.getTicks()+rand())%4;
-           if(!marker_down[0][car_down]&&!marker_down[1][car_down]&&!marker_down[2][car_down]&&!marker_down[3][car_down])
-           {
-             if(car_down> 0)
-             {
-               if(marker_down[0][car_down-1]|| marker_down[1][car_down-1]|| marker_down[2][car_down-1]||marker_down[3][car_down-1])
-               {
-                 if(ypos_down[car_down-1]> 200)marker_down[vehicle_variant_selector][car_down++]=1;
-               }
-               else marker_down[vehicle_variant_selector][car_down++]=1;
-             }
-             else
-             {
-               if(marker_down[0][7]|| marker_down[1][7]|| marker_down[2][7]||marker_down[3][7])
-               {
-                 if(ypos_down[7]> 200)marker_down[vehicle_variant_selector][car_down++]=1;
-               }
-               else  marker_down[vehicle_variant_selector][car_down++]=1;
-             }
-
-           }
+           marker_down[vehicle_variant_selector][car_down++]=1;
          }
          //SDL_Delay(5);
          for(int w=0;w<8;w++)
@@ -1290,11 +1277,18 @@ int main(int argc,char *argv[])
              }
            }
 
-           if(is_colliding(character_x,character_y,xpos_up[w],ypos_up[w],h1,w1) || is_colliding(character_x,character_y,xpos_down[w],ypos_down[w],h2,w2))
+           if((is_colliding(character_x,character_y,xpos_up[w],ypos_up[w],h1,w1) || is_colliding(character_x,character_y,xpos_down[w],ypos_down[w],h2,w2)) && !is_already_hit)
            {
              character_x=600;
              stamina-=stamina_blow;
+             is_already_hit = true;
+             blinker.stop();
+             blinker.start();
              //SDL_Delay(50);
+           }
+           if(blinker.getTicks() >= 3000)
+           {
+             is_already_hit = false;
            }
            h1=0,w1=0,w2=0,h2=0;
            for(int q=0;q<4;q++)
@@ -1351,10 +1345,13 @@ int main(int argc,char *argv[])
                break;
              }
            }
-           if(is_colliding(character_x,character_y,xpos_right[w],y_right,h1,w1) || is_colliding(character_x,character_y,xpos_left[w],y_left,h2,w2))
+           if((is_colliding(character_x,character_y,xpos_right[w],y_right,h1,w1) || is_colliding(character_x,character_y,xpos_left[w],y_left,h2,w2))&&!is_already_hit)
            {
              character_x=600;
              stamina-=stamina_blow;
+             is_already_hit = true;
+             blinker.stop();
+             blinker.start();
              //SDL_Delay(50);
            }
          }
@@ -1424,8 +1421,6 @@ int main(int argc,char *argv[])
          {
            moto = 1;
          }
-         if(1)
-         {
            for(int w=0;w<8;w++)
            {
              if(marker_up[0][w]||marker_up[1][w]||marker_up[2][w]||marker_up[3][w])
@@ -1443,13 +1438,12 @@ int main(int argc,char *argv[])
            }
            if(bike_up_stat)ypos_bike_up -= fps*2;
            if(bike_down_stat)ypos_bike_down += fps*2;
-         }
+
          for(int w=0;w<8;w++)
          {
 
            if(marker_left[0][w]||marker_left[1][w]||marker_left[2][w]||marker_left[3][w])
            {
-            // printf("FCK YOUUUUU\n");
              xpos_left[w]+=2*fps;//- fps*state[SDL_SCANCODE_UP]);
            }
            if(marker_right[0][w]||marker_right[1][w]||marker_right[2][w]||marker_right[3][w])
@@ -1595,10 +1589,26 @@ int main(int argc,char *argv[])
             else if(marker_snacks[1][w])frooto.render(xpos_snack[w],ypos_snack[w],&frooto_rect);
             if(marker_coin[w])coin.render(xpos_coin[w],ypos_coin[w],coin_rect+c_f);
           }
-          if(ident == 0)skeleton.render(character_x,character_y,going_up+f);
-          else if(ident == 1)skeleton.render(character_x,character_y,going_down+f);
-          else if(ident == 2)skeleton.render(character_x,character_y,going_left+f);
-          else if(ident == 3)skeleton.render(character_x,character_y,going_right+f);
+          if(!is_already_hit)
+          {
+            if(ident == 0)skeleton.render(character_x,character_y,going_up+f);
+            else if(ident == 1)skeleton.render(character_x,character_y,going_down+f);
+            else if(ident == 2)skeleton.render(character_x,character_y,going_left+f);
+            else if(ident == 3)skeleton.render(character_x,character_y,going_right+f);
+          }
+          else
+          {
+            printf("%d\n",blinker.getTicks());
+            if(blinker.getTicks()%250 < 125)
+            {
+              if(ident == 0)skeleton.render(character_x,character_y,going_up+f);
+              else if(ident == 1)skeleton.render(character_x,character_y,going_down+f);
+              else if(ident == 2)skeleton.render(character_x,character_y,going_left+f);
+              else if(ident == 3)skeleton.render(character_x,character_y,going_right+f);
+              //blink_toggle=false;
+            }
+          //  else blink_toggle=true;
+          }
           for(int w=0;w<8;w++)
           {
             if(marker_up[0][w]== 1)gari_up.render(450,ypos_up[w],&vehichle_up[0]);
