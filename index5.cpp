@@ -741,13 +741,15 @@ int main(int argc,char *argv[])
       bool left_permit=1;
       bool walk_limit = true;
       bool is_already_hit=false;
-      bool blink_toggle = false;
 
       Uint32 paused_clock_release_ticks;
       Uint32 paused_clock_move_ticks;
       Uint32 paused_snacks_ticks;
       Uint32 paused_beka_ticks;
       Uint32 paused_tera_ticks;
+      Uint32 paused_upre_ticks;
+      Uint32 paused_niche_ticks;
+      Uint32 paused_blinker_ticks;
       int paused_tempscore;
       int paused_side_walk_y_1;
       int paused_side_walk_y_2;
@@ -799,6 +801,7 @@ int main(int argc,char *argv[])
       //int paused_fff;
       bool paused_left_permit;
       bool paused_right_permit;
+      bool paused_is_already_hit;
 
       int nonbool_marker_up[4][8] = {0};
       int nonbool_marker_down[4][8] = {0};
@@ -813,6 +816,7 @@ int main(int argc,char *argv[])
       int nonbool_bottomFrame = 0;
       int nonbool_right_permit = 1;
       int nonbool_left_permit = 1;
+      int nonbool_is_already_hit = 0;
 
       const Uint8 *state = SDL_GetKeyboardState(NULL);
       while(!quit)
@@ -978,11 +982,17 @@ int main(int argc,char *argv[])
                 fscanf(readstate, "%u", &paused_snacks_ticks);
                 fscanf(readstate, "%u", &paused_beka_ticks);
                 fscanf(readstate, "%u", &paused_tera_ticks);
+                fscanf(readstate, "%u", &paused_upre_ticks);
+                fscanf(readstate, "%u", &paused_niche_ticks);
+                fscanf(readstate, "%u", &paused_blinker_ticks);
                 clock_release.setTicks(paused_clock_release_ticks);
                 clock_move.setTicks(paused_clock_move_ticks);
                 snacks.setTicks(paused_snacks_ticks);
                 beka.setTicks(paused_beka_ticks);
                 tera.setTicks(paused_tera_ticks);
+                upre.setTicks(paused_upre_ticks);
+                niche.setTicks(paused_niche_ticks);
+                blinker.setTicks(paused_blinker_ticks);
                 fscanf(readstate, "%d", &tempscore);
                 padded_itoa(tempscore, tempscore_string);
                 fscanf(readstate, "%d", &side_walk_y_1);
@@ -1054,6 +1064,7 @@ int main(int argc,char *argv[])
                 }
                 fscanf(readstate, "%d", &nonbool_left_permit);
                 fscanf(readstate, "%d", &nonbool_right_permit);
+                fscanf(readstate, "%d", &nonbool_is_already_hit);
 
                 bike_up_stat = nonbool_bike_up_stat;
                 bike_down_stat = nonbool_bike_down_stat;
@@ -1062,6 +1073,7 @@ int main(int argc,char *argv[])
                 bottomFrame = nonbool_bottomFrame;
                 right_permit = nonbool_right_permit;
                 left_permit = nonbool_left_permit;
+                is_already_hit = nonbool_is_already_hit;
               }
               else {
                 printf("No savestate found\n");
@@ -1605,9 +1617,7 @@ int main(int argc,char *argv[])
               else if(ident == 1)skeleton.render(character_x,character_y,going_down+f);
               else if(ident == 2)skeleton.render(character_x,character_y,going_left+f);
               else if(ident == 3)skeleton.render(character_x,character_y,going_right+f);
-              //blink_toggle=false;
             }
-          //  else blink_toggle=true;
           }
           for(int w=0;w<8;w++)
           {
@@ -1767,6 +1777,9 @@ int main(int argc,char *argv[])
             paused_snacks_ticks = snacks.getTicks();
             paused_beka_ticks = beka.getTicks();
             paused_tera_ticks = tera.getTicks();
+            paused_upre_ticks = upre.getTicks();
+            paused_niche_ticks = niche.getTicks();
+            paused_blinker_ticks = blinker.getTicks();
             paused_tempscore = tempscore;
             paused_side_walk_y_1 = side_walk_y_1;
             paused_side_walk_y_2 = side_walk_y_2;
@@ -1832,6 +1845,7 @@ int main(int argc,char *argv[])
             //paused_fff = fff;
             paused_left_permit = left_permit;
             paused_right_permit = right_permit;
+            paused_is_already_hit = is_already_hit;
 
             SDL_GetMouseState(&mx,&my);
             if(hover(mx,my,resume_button_x,resume_button_y,button_height,button_width))
@@ -1893,6 +1907,9 @@ int main(int argc,char *argv[])
               fprintf(writestate, "%u\n", paused_snacks_ticks);
               fprintf(writestate, "%u\n", paused_beka_ticks);
               fprintf(writestate, "%u\n", paused_tera_ticks);
+              fprintf(writestate, "%u\n", paused_upre_ticks);
+              fprintf(writestate, "%u\n", paused_niche_ticks);
+              fprintf(writestate, "%u\n", paused_blinker_ticks);
               fprintf(writestate, "%d\n", paused_tempscore);
               fprintf(writestate, "%d\n", paused_side_walk_y_1);
               fprintf(writestate, "%d\n", paused_side_walk_y_2);
@@ -1957,6 +1974,7 @@ int main(int argc,char *argv[])
               }
               fprintf(writestate, "%d\n", paused_left_permit);
               fprintf(writestate, "%d\n", paused_right_permit);
+              fprintf(writestate, "%d\n", paused_is_already_hit);
 
               fclose(writestate);
 
