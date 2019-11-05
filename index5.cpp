@@ -85,6 +85,7 @@ SDL_Rect hof_bg_rect;
 SDL_Rect tutorial_bg_rect;
 SDL_Rect pause_screen_rect;
 SDL_Rect savestate_dlg_rect;
+SDL_Rect stamina_overlay_rect;
 TTF_Font *main_font;
 int tempscore = 0;
 char tempscore_string[9] = {0};
@@ -135,7 +136,7 @@ texture_jinish chips,frooto,coin;
 texture_jinish scorename[10],score[10],currentscore,currentscore_backdrop,scoresave_text,scoresave_name;
 texture_jinish bike_up,bike_down;
 texture_jinish hof_bg, pause_screen, tutorial_bg;
-texture_jinish savestate_dlg;
+texture_jinish savestate_dlg, stamina_overlay;
 timer clock_release,clock_move,snacks,beka,tera;
 timer upre,niche;
 timer blinker;
@@ -532,6 +533,7 @@ bool loadMedia()
   s = s & tutorial_bg.loadFromFile("tutorial_bg.png");
   s = s & pause_screen.loadFromFile("pause_screen.png");
   s = s & savestate_dlg.loadFromFile("savestate_dlg.png");
+  s = s & stamina_overlay.loadFromFile("stamina_overlay.png");
   s = s & gari_left.loadFromFile("car4.png");
   s = s & gari_right.loadFromFile("car3.png");
   s = s & bus_left.loadFromFile("bus4.png");
@@ -565,6 +567,7 @@ bool loadMedia()
   tutorial_bg_rect.x = 0,tutorial_bg_rect.y = 0,tutorial_bg_rect.w = 1280,tutorial_bg_rect.h = 720;
   pause_screen_rect.x = 0,pause_screen_rect.y = 0,pause_screen_rect.w = 1280,pause_screen_rect.h = 720;
   savestate_dlg_rect.x = 0,savestate_dlg_rect.y = 0,savestate_dlg_rect.w = 200,savestate_dlg_rect.h = 60;
+  stamina_overlay_rect.x=0,stamina_overlay_rect.y=0,stamina_overlay_rect.w=1280,stamina_overlay_rect.h=33;
   currentscore_backdrop_rect.x = 0,currentscore_backdrop_rect.y = 0,currentscore_backdrop_rect.w = 300,currentscore_backdrop_rect.h = 70;currentscore_backdrop.setAlpha(120);
 
         int hx = 0,hy = 0,inter = 90;
@@ -1610,7 +1613,7 @@ int main(int argc,char *argv[])
           }
           else
           {
-            printf("%d\n",blinker.getTicks());
+            //printf("%d\n",blinker.getTicks());
             if(blinker.getTicks()%250 < 125)
             {
               if(ident == 0)skeleton.render(character_x,character_y,going_up+f);
@@ -1646,19 +1649,17 @@ int main(int argc,char *argv[])
           SDL_Rect stam = {0,0,stamina,15};
           if (stamina >= 800) {
             SDL_SetRenderDrawColor( main_renderer, 0x85, 0xDD, 0x88, 0xFF ); //Colour code #85dd88
-            SDL_RenderFillRect( main_renderer, &stam );
-            SDL_RenderPresent(main_renderer);
           }
           else if (stamina < 800 && stamina >= 400) {
             SDL_SetRenderDrawColor( main_renderer, 0xDD, 0xB5, 0x85, 0xFF ); //Colour code #ddb585
-            SDL_RenderFillRect( main_renderer, &stam );
-            SDL_RenderPresent(main_renderer);
           }
           else {
             SDL_SetRenderDrawColor( main_renderer, 0xDD, 0x85, 0x85, 0xFF ); //Colour code #dd8585
-            SDL_RenderFillRect( main_renderer, &stam );
-            SDL_RenderPresent(main_renderer);
           }
+
+          SDL_RenderFillRect( main_renderer, &stam );
+          stamina_overlay.render(0, 0, &stamina_overlay_rect);
+          SDL_RenderPresent(main_renderer);
           /*if(!game_paused)
           {*/
           if(state[SDL_SCANCODE_UP] ||state[SDL_SCANCODE_LEFT]||state[SDL_SCANCODE_RIGHT]||state[SDL_SCANCODE_DOWN])//if we're playing the game, then these conditions apply
