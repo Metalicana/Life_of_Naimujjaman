@@ -27,6 +27,7 @@ const int load_button_x = 275,load_button_y = 450;
 const int tutorial_button_x = 625,tutorial_button_y = 450;
 const int quit_button_x = 425,quit_button_y = 550;
 const int hof_button_x = 625,hof_button_y = 350;
+const int statenum_button_x = 450, statenum_button_ini_y = 150;
 const int back_circ_button_x = 100,back_circ_button_y = 50;
 const int resume_button_x = 450, resume_button_y = 300;
 const int state_button_x = 450, state_button_y = 400;
@@ -61,6 +62,7 @@ SDL_Rect load_button_rect;
 SDL_Rect tutorial_button_rect;
 SDL_Rect quit_button_rect;
 SDL_Rect hof_button_rect;
+SDL_Rect statenum_button_rect[5];
 SDL_Rect back_circ_button_rect;
 SDL_Rect resume_button_rect;
 SDL_Rect state_button_rect;
@@ -82,6 +84,7 @@ SDL_Rect score_rect[totalscorenum];
 SDL_Rect currentscore_rect,currentscore_backdrop_rect;
 SDL_Rect scoresave_text_rect, scoresave_name_rect;
 SDL_Rect hof_bg_rect;
+SDL_Rect load_bg_rect;
 SDL_Rect tutorial_bg_rect;
 SDL_Rect pause_screen_rect;
 SDL_Rect savestate_dlg_rect;
@@ -107,7 +110,6 @@ class texture_jinish
   private:
     SDL_Texture *mTexture;//main texture
     int mWidth,mHeight;//main width and height
-
 };
 class timer
 {
@@ -128,6 +130,7 @@ private:
 };
 
 texture_jinish skeleton,play_button,load_button,tutorial_button,quit_button,hof_button,back_circ_button,resume_button,state_button,menu_button,button_shadow,logo;
+texture_jinish statenum_button[5];
 texture_jinish road,side_walk,side_walk_2,out_of_bounds_left,out_of_bounds_right;
 texture_jinish gari_up,bus_up,dotola_bus_up,cng_up;
 texture_jinish gari_down,bus_down,dotola_bus_down,cng_down;
@@ -135,7 +138,7 @@ texture_jinish gari_left,gari_right,bus_left,bus_right,dotola_bus_left,dotola_bu
 texture_jinish chips,frooto,coin;
 texture_jinish scorename[10],score[10],currentscore,currentscore_backdrop,scoresave_text,scoresave_name;
 texture_jinish bike_up,bike_down;
-texture_jinish hof_bg, pause_screen, tutorial_bg;
+texture_jinish hof_bg, load_bg, pause_screen, tutorial_bg;
 texture_jinish savestate_dlg, stamina_overlay;
 timer clock_release,clock_move,snacks,beka,tera;
 timer upre,niche;
@@ -508,6 +511,11 @@ bool loadMedia()
   s = s & quit_button.loadFromFile("quit_btn.png");
   s = s & hof_button.loadFromFile("hof_btn.png");
   s = s & back_circ_button.loadFromFile("back_circ_btn.png");
+  s = s & statenum_button[0].loadFromFile("state_btn_1.png");
+  s = s & statenum_button[1].loadFromFile("state_btn_2.png");
+  s = s & statenum_button[2].loadFromFile("state_btn_3.png");
+  s = s & statenum_button[3].loadFromFile("state_btn_4.png");
+  s = s & statenum_button[4].loadFromFile("state_btn_5.png");
   s = s & resume_button.loadFromFile("resume_btn.png");
   s = s & state_button.loadFromFile("savestate_btn.png");
   s = s & menu_button.loadFromFile("menu_btn.png");
@@ -530,6 +538,7 @@ bool loadMedia()
   s = s & bike_down.loadFromFile("bike2.png");
   s = s & coin.loadFromFile("coinsprites/coinspritesheet.png");
   s = s & hof_bg.loadFromFile("hof_bg.png");
+  s = s & load_bg.loadFromFile("load_bg.png");
   s = s & tutorial_bg.loadFromFile("tutorial_bg.png");
   s = s & pause_screen.loadFromFile("pause_screen.png");
   s = s & savestate_dlg.loadFromFile("savestate_dlg.png");
@@ -550,6 +559,12 @@ bool loadMedia()
   tutorial_button_rect.x = 0;tutorial_button_rect.y = 0;tutorial_button_rect.h = 119;tutorial_button_rect.w = 363;
   quit_button_rect.x = 0;quit_button_rect.y = 0;quit_button_rect.h = 119;quit_button_rect.w = 363;
   hof_button_rect.x = 0;hof_button_rect.y = 0;hof_button_rect.h = 119;hof_button_rect.w = 363;
+  for (int statenum_rect_initialiser = 0; statenum_rect_initialiser < 5; statenum_rect_initialiser++) {
+    statenum_button_rect[statenum_rect_initialiser].x = 0;
+    statenum_button_rect[statenum_rect_initialiser].y = 0;
+    statenum_button_rect[statenum_rect_initialiser].h = 119;
+    statenum_button_rect[statenum_rect_initialiser].w = 363;
+  }
   back_circ_button_rect.x = 0;back_circ_button_rect.y = 0;back_circ_button_rect.w = 50;back_circ_button_rect.h = 50;
   resume_button_rect.x = 0;resume_button_rect.y = 0;resume_button_rect.h = 119;resume_button_rect.w = 363;
   state_button_rect.x = 0;state_button_rect.y = 0;state_button_rect.h = 119;state_button_rect.w = 363;
@@ -564,6 +579,7 @@ bool loadMedia()
   frooto_rect.x = 0,frooto_rect.y = 0,frooto_rect.w = 24,frooto_rect.h = 60;
   currentscore_rect.x = 0,currentscore_rect.y = 0,currentscore_rect.w = 250,currentscore_rect.h = 50;
   hof_bg_rect.x = 0,hof_bg_rect.y = 0,hof_bg_rect.w = 1280,hof_bg_rect.h = 720;
+  load_bg_rect.x = 0,load_bg_rect.y = 0,load_bg_rect.w = 1280,load_bg_rect.h = 720;
   tutorial_bg_rect.x = 0,tutorial_bg_rect.y = 0,tutorial_bg_rect.w = 1280,tutorial_bg_rect.h = 720;
   pause_screen_rect.x = 0,pause_screen_rect.y = 0,pause_screen_rect.w = 1280,pause_screen_rect.h = 720;
   savestate_dlg_rect.x = 0,savestate_dlg_rect.y = 0,savestate_dlg_rect.w = 200,savestate_dlg_rect.h = 60;
@@ -658,6 +674,7 @@ void close()
   gari_down.free();bus_down.free();dotola_bus_down.free();cng_down.free();
   skeleton.free();
   hof_bg.free();
+  load_bg.free();
   for (unsigned int scorequit_idx = 0; scorequit_idx < totalscorenum; scorequit_idx++) {
     score[scorequit_idx].free();
     scorename[scorequit_idx].free();
@@ -710,8 +727,10 @@ int main(int argc,char *argv[])
       bool rerender_text = false;
       bool savenow = false;
       bool game_paused = false;
-      bool loadstate = false;
-      bool write_state_tofile = false;
+      bool load_screen = false;
+      bool write_screen = false;
+      int loadstate = -1;
+      int write_state_tofile = -1;
       int vehicle_variant_selector;
       int snack_variant_selector;
       int snack = 0;
@@ -829,7 +848,7 @@ int main(int argc,char *argv[])
             if(e.type == SDL_MOUSEBUTTONDOWN)
             {
               SDL_GetMouseState(&mx,&my);
-              if((hover(mx,my,play_button_x,play_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
+              if((hover(mx,my,play_button_x,play_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave && !load_screen)
               {
                 clock_release.start();
                 clock_move.start();
@@ -841,43 +860,65 @@ int main(int argc,char *argv[])
                 blinker.start();
                 in_game = true;
               }
-              else if((hover(mx,my,load_button_x,load_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
+              else if((hover(mx,my,load_button_x,load_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave && !load_screen)
               {
-                clock_release.start();
-                clock_move.start();
-                snacks.start();
-                beka.start();
-                tera.start();
-                upre.start();
-                niche.start();
-                blinker.start();
-                loadstate = true;
-                in_game = true;
+                load_screen = true;
               }
-              else if((hover(mx,my,tutorial_button_x,tutorial_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
+              else if((hover(mx,my,tutorial_button_x,tutorial_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave && !load_screen)
               {
                 in_tutorial = true;
               }
-              else if((hover(mx,my,quit_button_x,quit_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
+              else if((hover(mx,my,quit_button_x,quit_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave && !load_screen)
               {
                 quit = true;
               }
-              else if((hover(mx,my,hof_button_x,hof_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave)
+              else if((hover(mx,my,hof_button_x,hof_button_y,button_height,button_width)) && !in_game && !in_scoreboard && !in_scoresave && !load_screen)
               {
                 in_scoreboard = true;
               }
-              else if((hover(mx,my,back_circ_button_x,back_circ_button_y,50,50)) && (in_scoreboard || in_tutorial))
+              else if((hover(mx,my,back_circ_button_x,back_circ_button_y,50,50)) && (in_scoreboard || in_tutorial || load_screen || write_screen))
               {
                 if (in_scoreboard)
                 {
                   in_scoreboard = false;
+                }
+                else if (load_screen)
+                {
+                  load_screen = false;
+                }
+                else if (write_screen)
+                {
+                  write_screen = false;
                 }
                 else
                 {
                   in_tutorial = false;
                 }
               }
-              else if((hover(mx,my,resume_button_x,resume_button_y,button_height,button_width)) && in_game && game_paused)
+              else if (load_screen)
+              {
+                for (int statenum_ls = 0, statenum_y = statenum_button_ini_y; statenum_ls < 5; statenum_ls++, statenum_y += 119)
+                {
+                  if (hover(mx, my, statenum_button_x, statenum_y, button_height, button_width))
+                  {
+                    loadstate = statenum_ls;
+                    break;
+                  }
+                }
+                if (loadstate != -1) {
+                  load_screen = false;
+                  clock_release.start();
+                  clock_move.start();
+                  snacks.start();
+                  beka.start();
+                  tera.start();
+                  upre.start();
+                  niche.start();
+                  blinker.start();
+                  in_game = true;
+                }
+              }
+              else if((hover(mx,my,resume_button_x,resume_button_y,button_height,button_width)) && in_game && game_paused && !write_screen)
               {
                 game_paused = false;
                 clock_release.unpause();
@@ -889,11 +930,22 @@ int main(int argc,char *argv[])
                 niche.unpause();
                 blinker.unpause();
               }
-              else if((hover(mx,my,state_button_x,state_button_y,button_height,button_width)) && in_game && game_paused)
+              else if((hover(mx,my,state_button_x,state_button_y,button_height,button_width)) && in_game && game_paused && !write_screen)
               {
-                write_state_tofile = true;
+                write_screen = true;
               }
-              else if((hover(mx,my,menu_button_x,menu_button_y,button_height,button_width)) && in_game && game_paused)
+              else if (in_game && game_paused && write_screen)
+              {
+                for (int statenum_ls = 0, statenum_y = statenum_button_ini_y; statenum_ls < 4; statenum_ls++, statenum_y += 119)
+                {
+                  if (hover(mx, my, statenum_button_x, statenum_y, button_height, button_width))
+                  {
+                    write_state_tofile = statenum_ls;
+                    break;
+                  }
+                }
+              }
+              else if((hover(mx,my,menu_button_x,menu_button_y,button_height,button_width)) && in_game && game_paused && !write_screen)
               {
                 clock_release.stop();
                 clock_move.stop();
@@ -976,10 +1028,28 @@ int main(int argc,char *argv[])
 
          if(!game_paused)
          {
-           if (loadstate) {
-              loadstate = false;
-              FILE *readstate = fopen("savedata/state.sav", "r");
-              if (readstate != NULL) {
+           if (loadstate != -1) {
+             FILE *readstate;
+             switch (loadstate) {
+               case 0:
+               readstate = fopen("savedata/state_1.sav", "r");
+               break;
+               case 1:
+               readstate = fopen("savedata/state_2.sav", "r");
+               break;
+               case 2:
+               readstate = fopen("savedata/state_3.sav", "r");
+               break;
+               case 3:
+               readstate = fopen("savedata/state_4.sav", "r");
+               break;
+               case 4:
+               readstate = fopen("savedata/state_5.sav", "r");
+               break;
+             }
+
+              if (readstate != NULL)
+              {
                 fscanf(readstate, "%u", &paused_clock_release_ticks);
                 fscanf(readstate, "%u", &paused_clock_move_ticks);
                 fscanf(readstate, "%u", &paused_snacks_ticks);
@@ -1083,6 +1153,8 @@ int main(int argc,char *argv[])
               }
 
               fclose(readstate);
+
+              loadstate = -1;
            }
          fff = std::max(road_y_1,road_y_2);
          if(topFrame)
@@ -1771,7 +1843,7 @@ int main(int argc,char *argv[])
             }
           }
         }
-          if (game_paused) {
+        if (game_paused && !write_screen) {
 
             paused_clock_release_ticks = clock_release.getTicks();
             paused_clock_move_ticks = clock_move.getTicks();
@@ -1899,103 +1971,140 @@ int main(int argc,char *argv[])
             menu_button.render(menu_button_x, menu_button_y, &menu_button_rect);
             SDL_RenderPresent(main_renderer);
 
-            if (write_state_tofile) {
 
-              FILE *writestate = fopen("savedata/state.sav", "w");
-
-              fprintf(writestate, "%u\n", paused_clock_release_ticks);
-              fprintf(writestate, "%u\n", paused_clock_move_ticks);
-              fprintf(writestate, "%u\n", paused_snacks_ticks);
-              fprintf(writestate, "%u\n", paused_beka_ticks);
-              fprintf(writestate, "%u\n", paused_tera_ticks);
-              fprintf(writestate, "%u\n", paused_upre_ticks);
-              fprintf(writestate, "%u\n", paused_niche_ticks);
-              fprintf(writestate, "%u\n", paused_blinker_ticks);
-              fprintf(writestate, "%d\n", paused_tempscore);
-              fprintf(writestate, "%d\n", paused_side_walk_y_1);
-              fprintf(writestate, "%d\n", paused_side_walk_y_2);
-              fprintf(writestate, "%d\n", paused_side_walk_y_3);
-              fprintf(writestate, "%d\n", paused_side_walk_y_4);
-              fprintf(writestate, "%d\n", paused_out_of_bounds_y_1);
-              fprintf(writestate, "%d\n", paused_out_of_bounds_y_2);
-              fprintf(writestate, "%d\n", paused_out_of_bounds_y_3);
-              fprintf(writestate, "%d\n", paused_out_of_bounds_y_4);
-              fprintf(writestate, "%d\n", paused_character_x);
-              fprintf(writestate, "%d\n", paused_character_y);
-              fprintf(writestate, "%d\n", paused_road_x);
-              fprintf(writestate, "%d\n", paused_road_y_1);
-              fprintf(writestate, "%d\n", paused_road_y_2);
-              fprintf(writestate, "%d\n", paused_speed);
-              for (int paused_marker_vehicle_variant_idx = 0; paused_marker_vehicle_variant_idx < 4; paused_marker_vehicle_variant_idx++) {
-                for (int paused_marker_vehicle_queue_idx = 0; paused_marker_vehicle_queue_idx < 8; paused_marker_vehicle_queue_idx++) {
-                  fprintf(writestate, "%d\n", paused_marker_up[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
-                  fprintf(writestate, "%d\n", paused_marker_down[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
-                  fprintf(writestate, "%d\n", paused_marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
-                  fprintf(writestate, "%d\n", paused_marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
-                }
-              }
-              for (int paused_marker_consumable_idx = 0; paused_marker_consumable_idx < 16; paused_marker_consumable_idx++) {
-                for (int paused_marker_snack_variant = 0; paused_marker_snack_variant < 2; paused_marker_snack_variant++) {
-                  fprintf(writestate, "%d\n", paused_marker_snacks[paused_marker_snack_variant][paused_marker_consumable_idx]);
-                }
-                fprintf(writestate, "%d\n", paused_marker_coin[paused_marker_consumable_idx]);
-              }
-              fprintf(writestate, "%d\n", paused_vehicle_variant_selector);
-              fprintf(writestate, "%d\n", paused_snack_variant_selector);
-              fprintf(writestate, "%d\n", paused_snack);
-              fprintf(writestate, "%d\n", paused_coins);
-              fprintf(writestate, "%d\n", paused_car_up);
-              fprintf(writestate, "%d\n", paused_car_down);
-              fprintf(writestate, "%d\n", paused_car_left);
-              fprintf(writestate, "%d\n", paused_car_right);
-              fprintf(writestate, "%d\n", paused_midFrame);
-              fprintf(writestate, "%d\n", paused_topFrame);
-              fprintf(writestate, "%d\n", paused_bottomFrame);
-              fprintf(writestate, "%d\n", paused_stamina);
-              fprintf(writestate, "%d\n", paused_stamina_blow);
-              fprintf(writestate, "%d\n", paused_bike_up_stat);
-              fprintf(writestate, "%d\n", paused_bike_down_stat);
-              fprintf(writestate, "%d\n", paused_ypos_bike_up);
-              fprintf(writestate, "%d\n", paused_ypos_bike_down);
-              for (int paused_xypos_vehicle_idx = 0; paused_xypos_vehicle_idx < 8; paused_xypos_vehicle_idx++) {
-                fprintf(writestate, "%d\n", paused_xpos_up[paused_xypos_vehicle_idx]);
-                fprintf(writestate, "%d\n", paused_xpos_down[paused_xypos_vehicle_idx]);
-                fprintf(writestate, "%d\n", paused_xpos_left[paused_xypos_vehicle_idx]);
-                fprintf(writestate, "%d\n", paused_xpos_right[paused_xypos_vehicle_idx]);
-                fprintf(writestate, "%d\n", paused_ypos_up[paused_xypos_vehicle_idx]);
-                fprintf(writestate, "%d\n", paused_ypos_down[paused_xypos_vehicle_idx]);
-              }
-              fprintf(writestate, "%d\n", paused_y_left);
-              fprintf(writestate, "%d\n", paused_y_right);
-              for (int paused_xypos_consumable_idx = 0; paused_xypos_consumable_idx < 16; paused_xypos_consumable_idx++) {
-                fprintf(writestate, "%d\n", paused_xpos_snack[paused_xypos_consumable_idx]);
-                fprintf(writestate, "%d\n", paused_ypos_snack[paused_xypos_consumable_idx]);
-                fprintf(writestate, "%d\n", paused_xpos_coin[paused_xypos_consumable_idx]);
-                fprintf(writestate, "%d\n", paused_ypos_coin[paused_xypos_consumable_idx]);
-              }
-              fprintf(writestate, "%d\n", paused_left_permit);
-              fprintf(writestate, "%d\n", paused_right_permit);
-              fprintf(writestate, "%d\n", paused_is_already_hit);
-
-              fclose(writestate);
-
-              /*for (int savestate_dlg_alpha_modulator = 255; savestate_dlg_alpha_modulator >= 0; savestate_dlg_alpha_modulator -= 32) {
-                SDL_Delay(1000);
-                printf("%u\n", savestate_dlg_alpha_modulator);
-                savestate_dlg.setAlpha(savestate_dlg_alpha_modulator);
-                savestate_dlg.render(1000, 100, &savestate_dlg_rect);
-                SDL_RenderPresent(main_renderer);
-              }*/
-
-              savestate_dlg.render(1000, 100, &savestate_dlg_rect);
-              SDL_RenderPresent(main_renderer);
-              write_state_tofile = false;
-            }
-
-          }
           SDL_Delay(10);
+        }
+        if (write_screen) {
 
+          FILE *writestate;
 
+          SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+          SDL_RenderClear( main_renderer );
+
+          load_bg.render(0, 0, &load_bg_rect);
+          back_circ_button.render(back_circ_button_x, back_circ_button_y, &back_circ_button_rect);
+
+          for (int statenum = 0, statenum_button_y = statenum_button_ini_y; statenum < 5; statenum++, statenum_button_y += 100) {
+            statenum_button[statenum].render(statenum_button_x, statenum_button_y, &statenum_button_rect[statenum]);
+          }
+
+          SDL_RenderPresent(main_renderer);
+
+          switch (write_state_tofile) {
+            case 0:
+            writestate = fopen("savedata/state_1.sav", "w");
+            break;
+            case 1:
+            writestate = fopen("savedata/state_2.sav", "w");
+            break;
+            case 2:
+            writestate = fopen("savedata/state_3.sav", "w");
+            break;
+            case 3:
+            writestate = fopen("savedata/state_4.sav", "w");
+            break;
+            case 4:
+            writestate = fopen("savedata/state_5.sav", "w");
+            break;
+          }
+
+          if (write_state_tofile != -1)
+          {
+            fprintf(writestate, "%u\n", paused_clock_release_ticks);
+            fprintf(writestate, "%u\n", paused_clock_move_ticks);
+            fprintf(writestate, "%u\n", paused_snacks_ticks);
+            fprintf(writestate, "%u\n", paused_beka_ticks);
+            fprintf(writestate, "%u\n", paused_tera_ticks);
+            fprintf(writestate, "%u\n", paused_upre_ticks);
+            fprintf(writestate, "%u\n", paused_niche_ticks);
+            fprintf(writestate, "%u\n", paused_blinker_ticks);
+            fprintf(writestate, "%d\n", paused_tempscore);
+            fprintf(writestate, "%d\n", paused_side_walk_y_1);
+            fprintf(writestate, "%d\n", paused_side_walk_y_2);
+            fprintf(writestate, "%d\n", paused_side_walk_y_3);
+            fprintf(writestate, "%d\n", paused_side_walk_y_4);
+            fprintf(writestate, "%d\n", paused_out_of_bounds_y_1);
+            fprintf(writestate, "%d\n", paused_out_of_bounds_y_2);
+            fprintf(writestate, "%d\n", paused_out_of_bounds_y_3);
+            fprintf(writestate, "%d\n", paused_out_of_bounds_y_4);
+            fprintf(writestate, "%d\n", paused_character_x);
+            fprintf(writestate, "%d\n", paused_character_y);
+            fprintf(writestate, "%d\n", paused_road_x);
+            fprintf(writestate, "%d\n", paused_road_y_1);
+            fprintf(writestate, "%d\n", paused_road_y_2);
+            fprintf(writestate, "%d\n", paused_speed);
+            for (int paused_marker_vehicle_variant_idx = 0; paused_marker_vehicle_variant_idx < 4; paused_marker_vehicle_variant_idx++) {
+              for (int paused_marker_vehicle_queue_idx = 0; paused_marker_vehicle_queue_idx < 8; paused_marker_vehicle_queue_idx++) {
+                fprintf(writestate, "%d\n", paused_marker_up[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
+                fprintf(writestate, "%d\n", paused_marker_down[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
+                fprintf(writestate, "%d\n", paused_marker_left[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
+                fprintf(writestate, "%d\n", paused_marker_right[paused_marker_vehicle_variant_idx][paused_marker_vehicle_queue_idx]);
+              }
+            }
+            for (int paused_marker_consumable_idx = 0; paused_marker_consumable_idx < 16; paused_marker_consumable_idx++) {
+              for (int paused_marker_snack_variant = 0; paused_marker_snack_variant < 2; paused_marker_snack_variant++) {
+                fprintf(writestate, "%d\n", paused_marker_snacks[paused_marker_snack_variant][paused_marker_consumable_idx]);
+              }
+              fprintf(writestate, "%d\n", paused_marker_coin[paused_marker_consumable_idx]);
+            }
+            fprintf(writestate, "%d\n", paused_vehicle_variant_selector);
+            fprintf(writestate, "%d\n", paused_snack_variant_selector);
+            fprintf(writestate, "%d\n", paused_snack);
+            fprintf(writestate, "%d\n", paused_coins);
+            fprintf(writestate, "%d\n", paused_car_up);
+            fprintf(writestate, "%d\n", paused_car_down);
+            fprintf(writestate, "%d\n", paused_car_left);
+            fprintf(writestate, "%d\n", paused_car_right);
+            fprintf(writestate, "%d\n", paused_midFrame);
+            fprintf(writestate, "%d\n", paused_topFrame);
+            fprintf(writestate, "%d\n", paused_bottomFrame);
+            fprintf(writestate, "%d\n", paused_stamina);
+            fprintf(writestate, "%d\n", paused_stamina_blow);
+            fprintf(writestate, "%d\n", paused_bike_up_stat);
+            fprintf(writestate, "%d\n", paused_bike_down_stat);
+            fprintf(writestate, "%d\n", paused_ypos_bike_up);
+            fprintf(writestate, "%d\n", paused_ypos_bike_down);
+            for (int paused_xypos_vehicle_idx = 0; paused_xypos_vehicle_idx < 8; paused_xypos_vehicle_idx++) {
+              fprintf(writestate, "%d\n", paused_xpos_up[paused_xypos_vehicle_idx]);
+              fprintf(writestate, "%d\n", paused_xpos_down[paused_xypos_vehicle_idx]);
+              fprintf(writestate, "%d\n", paused_xpos_left[paused_xypos_vehicle_idx]);
+              fprintf(writestate, "%d\n", paused_xpos_right[paused_xypos_vehicle_idx]);
+              fprintf(writestate, "%d\n", paused_ypos_up[paused_xypos_vehicle_idx]);
+              fprintf(writestate, "%d\n", paused_ypos_down[paused_xypos_vehicle_idx]);
+            }
+            fprintf(writestate, "%d\n", paused_y_left);
+            fprintf(writestate, "%d\n", paused_y_right);
+            for (int paused_xypos_consumable_idx = 0; paused_xypos_consumable_idx < 16; paused_xypos_consumable_idx++) {
+              fprintf(writestate, "%d\n", paused_xpos_snack[paused_xypos_consumable_idx]);
+              fprintf(writestate, "%d\n", paused_ypos_snack[paused_xypos_consumable_idx]);
+              fprintf(writestate, "%d\n", paused_xpos_coin[paused_xypos_consumable_idx]);
+              fprintf(writestate, "%d\n", paused_ypos_coin[paused_xypos_consumable_idx]);
+            }
+            fprintf(writestate, "%d\n", paused_left_permit);
+            fprintf(writestate, "%d\n", paused_right_permit);
+            fprintf(writestate, "%d\n", paused_is_already_hit);
+
+            fclose(writestate);
+
+            savestate_dlg.render(1000, 100, &savestate_dlg_rect);
+            SDL_RenderPresent(main_renderer);
+            write_state_tofile = -1;
+        }
+      }
+      }
+        else if(load_screen)
+        {
+          SDL_SetRenderDrawColor( main_renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+          SDL_RenderClear( main_renderer );
+
+          load_bg.render(0, 0, &load_bg_rect);
+          back_circ_button.render(back_circ_button_x, back_circ_button_y, &back_circ_button_rect);
+
+          for (int statenum = 0, statenum_button_y = statenum_button_ini_y; statenum < 5; statenum++, statenum_button_y += 100) {
+            statenum_button[statenum].render(statenum_button_x, statenum_button_y, &statenum_button_rect[statenum]);
+          }
+
+          SDL_RenderPresent(main_renderer);
         }
         else if(in_scoreboard)
         {
