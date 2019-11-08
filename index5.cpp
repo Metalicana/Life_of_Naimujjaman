@@ -739,15 +739,15 @@ int main(int argc,char *argv[])
       int stamina_blow = 100;
       bool bike_up_stat = 0;
       bool bike_down_stat = 0;
-      int ypos_bike_up = 920;
-      int ypos_bike_down = -200;
+      int ypos_bike_up = 1080;
+      int ypos_bike_down = -400;
       int xpos_bike;
       int bike_direction_selector;
       int bike_lane_selector;
       bool midFrame=false,topFrame=true,bottomFrame=false;
       int coins = 0;
       int xpos_up[8] = {450,450,450,450,450,450,450,450};
-      int ypos_up[8] = {920,920,920,920,920,920,920,920};
+      int ypos_up[8] = {1080,1080,1080,1080,1080,1080,1080,1080};
       int xpos_down[8] = {750,750,750,750,750,750,750,750};
       int ypos_down[8] = {-400,-400,-400,-400,-400,-400,-400,-400};
       int xpos_left[8] = {-100,-100,-100,-100,-100,-100,-100,-100};
@@ -984,7 +984,12 @@ int main(int argc,char *argv[])
                   niche.pause();
                   blinker.pause();
                 }
-                else {
+                else if (write_screen)
+                {
+                  write_screen = false;
+                }
+                else
+                {
                   game_paused = false;
                   clock_release.unpause();
                   clock_move.unpause();
@@ -1268,7 +1273,7 @@ int main(int argc,char *argv[])
          c_f++;
          if(c_f >= 36)c_f = 0;
 
-         if(upre.getTicks() >= 1500 && rand()%15<10)
+         if(upre.getTicks() >= 1600 && rand()%15<10)
          {
            srand(time(NULL));
            upre.stop();
@@ -1276,6 +1281,7 @@ int main(int argc,char *argv[])
            vehicle_variant_selector = rand()%4;
            marker_up[vehicle_variant_selector][car_up++]=1;
          }
+         SDL_Delay(1);
          if(rand()%10 < 8 && snacks.getTicks()>= 1000 && character_y <= 360 && state[SDL_SCANCODE_UP])
          {
            srand(time(NULL));
@@ -1296,7 +1302,7 @@ int main(int argc,char *argv[])
            }
          }
          srand(time(NULL));
-         if(niche.getTicks() >= 1500 && rand()%15<10)
+         if(niche.getTicks() >= 1400 && rand()%15<9)
          {
            srand(time(NULL));
            niche.stop();
@@ -1373,6 +1379,7 @@ int main(int argc,char *argv[])
              blinker.start();
              //SDL_Delay(50);
            }
+           SDL_Delay(1);
            if(blinker.getTicks() >= 3000)
            {
              is_already_hit = false;
@@ -1504,7 +1511,7 @@ int main(int argc,char *argv[])
          }
          stamina_blow = 100 + 20*(tempscore/1000);
          speed  = tempscore/8000 + 3;
-         if(tempscore > 8000)
+         if(tempscore > 2500)
          {
            moto = 1;
          }
@@ -1512,17 +1519,21 @@ int main(int argc,char *argv[])
            {
              if(marker_up[0][w]||marker_up[1][w]||marker_up[2][w]||marker_up[3][w])
              {
-               if(ypos_up[w]>= y_left && ypos_up[w]<=820)left_permit=0;
-               if(ypos_up[w]>=y_right && ypos_up[w] <= 820)right_permit=0;
-               ypos_up[w]-=(fps + fps/4 + (speed-2)*state[SDL_SCANCODE_UP] );
+               if(ypos_up[w]>= y_left && ypos_up[w]<=920)left_permit=0;
+               if(ypos_up[w]>=y_right && ypos_up[w] <= 920)right_permit=0;
+               ypos_up[w]-=(fps + fps/3 + (speed-2)*state[SDL_SCANCODE_UP] );
              }
              if(marker_down[0][w]||marker_down[1][w]||marker_down[2][w]||marker_down[3][w])
              {
-               if(ypos_down[w]<=y_left && ypos_down[w]>-300)left_permit=0;
-               if(ypos_down[w]<=y_right && ypos_down[w]>-300)right_permit=0;
-               ypos_down[w]+=(fps +fps/4 + (speed+1)*state[SDL_SCANCODE_UP]);
+               if(ypos_down[w]<=y_left && ypos_down[w]>-350)left_permit=0;
+               if(ypos_down[w]<=y_right && ypos_down[w]>-350)right_permit=0;
+               ypos_down[w]+=(fps +fps/3 + (speed+2)*state[SDL_SCANCODE_UP]);
              }
            }
+           if(ypos_bike_up > y_left && ypos_bike_up <= 820)left_permit = 0;
+           if(ypos_bike_up > y_right && ypos_bike_up <= 820)right_permit = 0;
+           if(ypos_bike_down < y_left && ypos_bike_down > -300)left_permit = 0;
+           if(ypos_bike_down < y_right && ypos_bike_down >-300)right_permit = 0;
            if(bike_up_stat)ypos_bike_up -= fps*2;
            if(bike_down_stat)ypos_bike_down += fps*2;
 
@@ -1531,18 +1542,18 @@ int main(int argc,char *argv[])
 
            if(marker_left[0][w]||marker_left[1][w]||marker_left[2][w]||marker_left[3][w])
            {
-             xpos_left[w]+=2*fps;//- fps*state[SDL_SCANCODE_UP]);
+             xpos_left[w]+=(2*fps + 6);//- fps*state[SDL_SCANCODE_UP]);
            }
            if(marker_right[0][w]||marker_right[1][w]||marker_right[2][w]||marker_right[3][w])
            {
-             xpos_right[w]-=2*fps;
+             xpos_right[w]-=(2*fps + 6);
            }
          }
          if(left_permit)
          {
            srand(time(NULL));
            vehicle_variant_selector = rand()%4;
-           if(tera.getTicks() >= 1500)
+           if(tera.getTicks() >= 1300)
            {
              marker_left[vehicle_variant_selector][car_left++]=1;
              left_permit=0;
@@ -1556,7 +1567,7 @@ int main(int argc,char *argv[])
          {
            srand(time(NULL));
            vehicle_variant_selector = rand()%4;
-           if(beka.getTicks() >= 1500)
+           if(beka.getTicks() >= 1400)
            {
              marker_right[vehicle_variant_selector][car_right++]=1;
              right_permit = 0;
@@ -1569,7 +1580,7 @@ int main(int argc,char *argv[])
          {
            if(character_y - ypos_bike_up > 720)
            {
-             ypos_bike_up = 920;
+             ypos_bike_up = 1080;
              bike_up_stat = 0;
            }
          }
@@ -1577,7 +1588,7 @@ int main(int argc,char *argv[])
          {
           if(ypos_bike_down - character_y > 720)
           {
-            ypos_bike_down = -200;
+            ypos_bike_down = -400;
             bike_down_stat = 0;
           }
          }
